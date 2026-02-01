@@ -144,7 +144,7 @@ class BookingServiceIntegrationTest {
 | Runtime | Java 21 | LTS, virtual threads ready |
 | Framework | Spring Boot 3.2 | Стандарт индустрии |
 | ORM | Spring Data JPA | Декларативные запросы |
-| База данных | PostgreSQL 15 | Exclusion constraints, range types |
+| База данных | PostgreSQL 18 | Exclusion constraints, range types |
 | Маппинг | MapStruct | Compile-time, без reflection |
 | Тесты | Testcontainers | Реальная БД в тестах |
 
