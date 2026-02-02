@@ -2,6 +2,8 @@ package org.nurfet.bookingsystem.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
+import org.nurfet.bookingsystem.repository.RoomRepository;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -41,6 +43,10 @@ public class Booking extends BaseEntity {
 
     protected Booking() {
 
+    }
+
+    public void changeRoom(Room room) {
+        this.room = Objects.requireNonNull(room, "Room cannot be null");
     }
 
     public Booking(Room room, String title, String organizerEmail,

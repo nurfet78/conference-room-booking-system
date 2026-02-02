@@ -3,6 +3,7 @@ package org.nurfet.bookingsystem.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import org.nurfet.bookingsystem.dto.request.CreateBookingRequest;
+import org.nurfet.bookingsystem.dto.request.UpdateBookingRequest;
 import org.nurfet.bookingsystem.dto.response.BookingResponse;
 import org.nurfet.bookingsystem.entity.BookingStatus;
 import org.nurfet.bookingsystem.service.BookingService;
@@ -117,13 +118,12 @@ public class BookingController {
         return ResponseEntity.ok(Map.of("activeBookings", count));
     }
 
-    @PatchMapping("/{id}/time")
+    @PatchMapping("/{id}")
     public ResponseEntity<BookingResponse> updateBookingTime(
             @PathVariable Long id,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startTime,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endTime) {
+            @Valid @RequestBody UpdateBookingRequest request) {
 
-        BookingResponse response = bookingService.updateBookingTime(id, startTime, endTime);
+        BookingResponse response = bookingService.updateBookingTime(id, request);
         return ResponseEntity.ok(response);
     }
 }

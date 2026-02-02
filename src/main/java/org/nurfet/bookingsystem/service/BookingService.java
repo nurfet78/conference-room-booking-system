@@ -1,6 +1,7 @@
 package org.nurfet.bookingsystem.service;
 
 import org.nurfet.bookingsystem.dto.request.CreateBookingRequest;
+import org.nurfet.bookingsystem.dto.request.UpdateBookingRequest;
 import org.nurfet.bookingsystem.dto.response.BookingResponse;
 import org.nurfet.bookingsystem.entity.Booking;
 import org.nurfet.bookingsystem.entity.BookingStatus;
@@ -204,7 +205,7 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingResponse updateBookingTime(Long id, Instant newStartTime, Instant newEndTime) {
+    public BookingResponse updateBookingTime(Long id, UpdateBookingRequest request) {
         Booking booking = bookingRepository.findByIdWithLock(id)
                 .orElseThrow(() -> new EntityNotFoundException("Booking", id));
 
@@ -212,21 +213,47 @@ public class BookingService {
             throw new InvalidBookingStateException("Cannot update inactive booking");
         }
 
-        boolean hasConflict = bookingRepository.existsOverlappingBooking(
-                booking.getRoom().getId(),
-                newStartTime,
-                newEndTime,
-                id);
+        Long roomId = request.roomId() != null ? request.roomId() : booking.getRoom().getId();
+        Instant startTime = request.startTime() != null ? request.startTime() : booking.getStartTime();
+        Instant endTime = request.endTime() != null ? request.endTime() : booking.getEndTime();
 
-        if (hasConflict) {
-            throw new BookingConflictException(
-                    booking.getRoom().getId(),
-                    newStartTime,
-                    newEndTime);
+        if (!endTime.isAfter(startTime)) {
+            throw new IllegalArgumentException("End time must be after start time");
         }
 
-        booking.setTimeInterval(newStartTime, newEndTime);
-        Booking saved = bookingRepository.save(booking);
-        return bookingMapper.toResponse(saved);
+        Room room = booking.getRoom();
+        if (request.roomId() != null && !request.roomId().equals(booking.getRoom().getId())) {
+            room = roomRepository.findByIdWithLock(request.roomId())
+                    .orElseThrow(() -> new EntityNotFoundException("Room", request.roomId()));
+
+            if (!room.isActive()) {
+                throw new RoomNotAvailableException(room.getId(), "Room is not active");
+            }
+        }
+
+        boolean timeOrRoomChanged = request.roomId() != null ||
+                request.startTime() != null ||
+                request.endTime() != null;
+
+        if (timeOrRoomChanged) {
+            boolean hasConflict = bookingRepository.existsOverlappingBooking(
+                    roomId, startTime, endTime, id);
+
+            if (hasConflict) {
+                throw new BookingConflictException(roomId, startTime, endTime);
+            }
+        }
+
+        if (request.roomId() != null) {
+            booking.changeRoom(room);
+        }
+        if (request.title() != null) {
+            booking.setTitle(request.title());
+        }
+        if (request.startTime() != null || request.endTime() != null) {
+            booking.setTimeInterval(startTime, endTime);
+        }
+
+        return bookingMapper.toResponse(booking);
     }
 }
