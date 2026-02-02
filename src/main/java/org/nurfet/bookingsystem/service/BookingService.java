@@ -3,6 +3,7 @@ package org.nurfet.bookingsystem.service;
 import org.nurfet.bookingsystem.dto.request.CreateBookingRequest;
 import org.nurfet.bookingsystem.dto.response.BookingResponse;
 import org.nurfet.bookingsystem.entity.Booking;
+import org.nurfet.bookingsystem.entity.BookingStatus;
 import org.nurfet.bookingsystem.entity.Room;
 import org.nurfet.bookingsystem.exception.BookingConflictException;
 import org.nurfet.bookingsystem.exception.EntityNotFoundException;
@@ -185,5 +186,47 @@ public class BookingService {
         }
 
         return count;
+    }
+
+    @Transactional(readOnly = true)
+    public List<BookingResponse> getBookingByStatus(BookingStatus status) {
+        List<Booking> bookings = bookingRepository.findByStatus(status);
+        return bookingMapper.toResponseList(bookings);
+    }
+
+    @Transactional(readOnly = true)
+    public long countActiveBookings(Long roomId) {
+        if (!roomRepository.existsById(roomId)) {
+            throw new EntityNotFoundException("Room", roomId);
+        }
+
+        return bookingRepository.countActiveBookingsRoom(roomId, Instant.now());
+    }
+
+    @Transactional
+    public BookingResponse updateBookingTime(Long id, Instant newStartTime, Instant newEndTime) {
+        Booking booking = bookingRepository.findByIdWithLock(id)
+                .orElseThrow(() -> new EntityNotFoundException("Booking", id));
+
+        if (!booking.getStatus().isActive()) {
+            throw new InvalidBookingStateException("Cannot update inactive booking");
+        }
+
+        boolean hasConflict = bookingRepository.existsOverlappingBooking(
+                booking.getRoom().getId(),
+                newStartTime,
+                newEndTime,
+                id);
+
+        if (hasConflict) {
+            throw new BookingConflictException(
+                    booking.getRoom().getId(),
+                    newStartTime,
+                    newEndTime);
+        }
+
+        booking.setTimeInterval(newStartTime, newEndTime);
+        Booking saved = bookingRepository.save(booking);
+        return bookingMapper.toResponse(saved);
     }
 }

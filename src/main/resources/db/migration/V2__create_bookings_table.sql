@@ -1,5 +1,4 @@
--- Enum статусов бронирования
-CREATE TYPE booking_status AS ENUM ('PENDING', 'CONFIRMED', 'CANCELLED', 'EXPIRED');
+
 
 -- Таблица бронирований
 CREATE TABLE bookings (
@@ -9,7 +8,7 @@ CREATE TABLE bookings (
     organizer_email VARCHAR(255) NOT NULL,
     start_time      TIMESTAMP WITH TIME ZONE NOT NULL,
     end_time        TIMESTAMP WITH TIME ZONE NOT NULL,
-    status          booking_status NOT NULL DEFAULT 'PENDING',
+    status          VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     created_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     version         BIGINT NOT NULL DEFAULT 0,

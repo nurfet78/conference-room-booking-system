@@ -4,16 +4,17 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import org.nurfet.bookingsystem.dto.request.CreateBookingRequest;
 import org.nurfet.bookingsystem.dto.response.BookingResponse;
+import org.nurfet.bookingsystem.entity.BookingStatus;
 import org.nurfet.bookingsystem.service.BookingService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
@@ -100,5 +101,29 @@ public class BookingController {
                     "conflicts", conflicts
             ));
         }
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<List<BookingResponse>> getBookingsByStatus(
+            @RequestParam BookingStatus status) {
+
+        List<BookingResponse> bookings = bookingService.getBookingByStatus(status);
+        return ResponseEntity.ok(bookings);
+    }
+
+    @GetMapping("/room/{roomId}/count")
+    public ResponseEntity<Map<String, Long>> countActiveBookings(@PathVariable Long roomId) {
+        long count = bookingService.countActiveBookings(roomId);
+        return ResponseEntity.ok(Map.of("activeBookings", count));
+    }
+
+    @PatchMapping("/{id}/time")
+    public ResponseEntity<BookingResponse> updateBookingTime(
+            @PathVariable Long id,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startTime,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endTime) {
+
+        BookingResponse response = bookingService.updateBookingTime(id, startTime, endTime);
+        return ResponseEntity.ok(response);
     }
 }

@@ -13,7 +13,7 @@ import java.util.Objects;
 public class Booking extends BaseEntity {
 
     private static final Duration MIN_DURATION = Duration.ofMinutes(15);
-    private static final Duration MAX_DURATION = Duration.ofMinutes(8);
+    private static final Duration MAX_DURATION = Duration.ofHours(8);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

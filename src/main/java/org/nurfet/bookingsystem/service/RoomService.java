@@ -101,15 +101,4 @@ public class RoomService {
 
         return roomMapper.toResponse(saving);
     }
-
-    public void deleteRoom(Long id) {
-        log.info("Deleting room: {}", id);
-
-        if (!roomRepository.existsById(id)) {
-            throw new EntityNotFoundException("Room", id);
-        }
-
-        roomRepository.deleteById(id);
-        log.info("Room deleted: {}", id);
-    }
 }
