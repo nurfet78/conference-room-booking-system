@@ -205,7 +205,7 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingResponse updateBookingTime(Long id, UpdateBookingRequest request) {
+    public BookingResponse updateBooking(Long id, UpdateBookingRequest request) {
         Booking booking = bookingRepository.findByIdWithLock(id)
                 .orElseThrow(() -> new EntityNotFoundException("Booking", id));
 

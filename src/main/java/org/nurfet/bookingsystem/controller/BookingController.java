@@ -119,11 +119,11 @@ public class BookingController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<BookingResponse> updateBookingTime(
+    public ResponseEntity<BookingResponse> updateBooking(
             @PathVariable Long id,
             @Valid @RequestBody UpdateBookingRequest request) {
 
-        BookingResponse response = bookingService.updateBookingTime(id, request);
+        BookingResponse response = bookingService.updateBooking(id, request);
         return ResponseEntity.ok(response);
     }
 }
