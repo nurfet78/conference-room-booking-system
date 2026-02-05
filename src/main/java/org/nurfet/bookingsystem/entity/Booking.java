@@ -52,7 +52,7 @@ public class Booking extends BaseEntity {
     public Booking(Room room, String title, String organizerEmail,
                    Instant startTime, Instant endTime) {
 
-        this.room = room;
+        this.room = Objects.requireNonNull(room, "Room cannot be null");
         this.title = title;
         this.organizerEmail = Objects.requireNonNull(organizerEmail, "Organizer email cannot be null");
         setTimeInterval(startTime, endTime);

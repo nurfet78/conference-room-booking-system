@@ -12,7 +12,7 @@ public class BookingConflictException extends BusinessException {
     private final Instant requestedEnd;
 
     public BookingConflictException(Long roomId, Instant requestedStart, Instant requestedEnd) {
-        super("КОНФЛИКТ БРОНИРОВАНИЯ",
+        super("BOOKING_CONFLICT",
                 "Комната %d уже забронирована за запрошенный период времени (%s - %s)"
                         .formatted(roomId, requestedStart, requestedEnd));
 
