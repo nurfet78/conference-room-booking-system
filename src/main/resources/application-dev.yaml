@@ -14,3 +14,14 @@ logging:
     com.example.roombook: DEBUG
     org.hibernate.SQL: DEBUG
     org.flywaydb: DEBUG
+
+# ======= Настройки OpenAPI / Swagger UI =======
+springdoc:
+  api-docs:
+    path: /v3/api-docs                    # URL для JSON-спецификации (дефолт)
+  swagger-ui:
+    path: /swagger-ui.html                # URL для Swagger UI (дефолт)
+    tags-sorter: alpha                    # Сортировать теги по алфавиту
+    operations-sorter: method             # Сортировать операции по HTTP-методу (GET, POST...)
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
