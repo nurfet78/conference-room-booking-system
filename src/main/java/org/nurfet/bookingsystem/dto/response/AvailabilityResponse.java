@@ -18,7 +18,7 @@ public record AvailabilityResponse(
 ) {
 
     /** Слот свободен */
-    public static AvailabilityResponse free() {           // было: available()
+    public static AvailabilityResponse free() {
         return new AvailabilityResponse(true, null);
     }
 

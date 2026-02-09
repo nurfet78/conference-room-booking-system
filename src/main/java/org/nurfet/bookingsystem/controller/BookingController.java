@@ -38,102 +38,11 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
-    @Operation(
-            summary = "Создать бронирование",
-            description = """
-                    Создаёт новое бронирование переговорной комнаты.
-                    
-                    **Правила:**
-                    - Комната должна существовать и быть активной
-                    - Временной слот не должен пересекаться с существующими бронированиями
-                    - Время начала должно быть в будущем
-                    - Время окончания должно быть после времени начала
-                    
-                    Бронирование создаётся в статусе `PENDING`.
-                    """,
-            operationId = "createBooking"
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "Бронирование успешно создано",
-                    content = @Content(schema = @Schema(implementation = BookingResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Ошибка валидации или конфликт времени",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class),
-                            // Несколько примеров ошибок — Swagger UI покажет выпадающий список
-                            examples = {
-                                    @ExampleObject(
-                                            name = "validationError",
-                                            summary = "Ошибка валидации полей",
-                                            value = """
-                                                    {
-                                                      "timeStamp": "2025-06-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Validation Failed",
-                                                      "errorCode": "VALIDATION_ERROR",
-                                                      "message": "Validation failed for one or more fields",
-                                                      "path": "/api/v1/bookings",
-                                                      "fieldErrors": [
-                                                        {
-                                                          "field": "organizerEmail",
-                                                          "message": "Invalid email format",
-                                                          "rejectedValue": "not-an-email"
-                                                        }
-                                                      ]
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "timeConflict",
-                                            summary = "Конфликт временного слота",
-                                            value = """
-                                                    {
-                                                      "timeStamp": "2025-06-15T10:30:00Z",
-                                                      "status": 400,
-                                                      "error": "Bad Request",
-                                                      "errorCode": "TIME_SLOT_CONFLICT",
-                                                      "message": "Requested time slot conflicts with existing booking",
-                                                      "path": "/api/v1/bookings"
-                                                    }
-                                                    """
-                                    )
-                            }
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Комната не найдена",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            )
-    })
+    @Operation(summary = "Создать бронирование")
+    @ApiResponse(responseCode = "201", description = "Бронирование создано",
+            content = @Content(schema = @Schema(implementation = BookingResponse.class)))
     @PostMapping
-    public ResponseEntity<BookingResponse> createBooking(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Данные для создания бронирования",
-                    required = true,
-                    content = @Content(
-                            schema = @Schema(implementation = CreateBookingRequest.class),
-                            examples = @ExampleObject(
-                                    name = "createBookingExample",
-                                    summary = "Пример бронирования на 1 час",
-                                    value = """
-                                            {
-                                              "roomId": 1,
-                                              "title": "Еженедельный стендап команды Backend",
-                                              "organizerEmail": "ivan.petrov@example.com",
-                                              "startTime": "2025-07-01T09:00:00Z",
-                                              "endTime": "2025-07-01T10:00:00Z"
-                                            }
-                                            """
-                            )
-                    )
-            )
-            @Valid @RequestBody CreateBookingRequest request) {
+    public ResponseEntity<BookingResponse> createBooking(@Valid @RequestBody CreateBookingRequest request) {
 
         BookingResponse response = bookingService.createBooking(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -150,9 +59,7 @@ public class BookingController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<BookingResponse> getBooking(
-            @Parameter(description = "ID бронирования", required = true, example = "42")
-            @PathVariable Long id) {
+    public ResponseEntity<BookingResponse> getBooking(@PathVariable Long id) {
         BookingResponse response = bookingService.getBooking(id);
 
         return ResponseEntity.ok(response);
@@ -172,16 +79,13 @@ public class BookingController {
     })
     @GetMapping("/room/{roomId}")
     public ResponseEntity<List<BookingResponse>> getBookingsByRoom(
-            @Parameter(description = "ID комнаты", required = true, example = "1")
             @PathVariable Long roomId,
-
             @Parameter(
                     description = "Начало диапазона (ISO 8601, UTC)",
                     required = true,
                     example = "2025-07-01T00:00:00Z"
             )
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)Instant from,
-
             @Parameter(
                     description = "Конец диапазона (ISO 8601, UTC)",
                     required = true,
@@ -204,9 +108,7 @@ public class BookingController {
             content = @Content(array = @ArraySchema(
                     schema = @Schema(implementation = BookingResponse.class))))
     @GetMapping("/room/{roomId}/active")
-    public ResponseEntity<List<BookingResponse>> getActiveBookings(
-            @Parameter(description = "ID комнаты", required = true, example = "1")
-            @PathVariable Long roomId) {
+    public ResponseEntity<List<BookingResponse>> getActiveBookings(@PathVariable Long roomId) {
 
         List<BookingResponse> bookings = bookingService.getActiveBookingsByRoom(roomId);
         return ResponseEntity.ok(bookings);
@@ -248,7 +150,6 @@ public class BookingController {
     })
     @PostMapping("/{id}/confirm")
     public ResponseEntity<BookingResponse> confirmBooking(
-            @Parameter(description = "ID бронирования для подтверждения", required = true, example = "42")
             @PathVariable Long id) {
         BookingResponse booking = bookingService.confirmBooking(id);
         return ResponseEntity.ok(booking);
@@ -269,66 +170,20 @@ public class BookingController {
     })
     @PostMapping("/{id}/cancel")
     public ResponseEntity<BookingResponse> cancelBooking(
-            @Parameter(description = "ID бронирования для отмены", required = true, example = "42")
             @PathVariable Long id) {
         BookingResponse booking = bookingService.cancelBooking(id);
         return ResponseEntity.ok(booking);
     }
 
     @Operation(
-            summary = "Проверить доступность временного слота",
-            description = """
-                    Проверяет, свободен ли запрошенный временной слот в указанной комнате.
-                    Если слот занят, возвращает список конфликтующих бронирований.
-                    """,
-            operationId = "checkAvailability"
+            summary = "Проверка доступности временного слота",
+            description = "Возвращает информацию о доступности временного слота для указанной комнаты."
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Результат проверки доступности",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = AvailabilityResponse.class),
-                            examples = {
-                                    @ExampleObject(
-                                            name = "available",
-                                            summary = "Слот свободен",
-                                            value = """
-                                                    {
-                                                      "available": true,
-                                                      "conflicts": null
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "unavailable",
-                                            summary = "Слот занят",
-                                            value = """
-                                                    {
-                                                      "available": false,
-                                                      "conflicts": [
-                                                        {
-                                                          "id": 42,
-                                                          "roomId": 1,
-                                                          "roomName": "Конференц-зал «Эверест»",
-                                                          "title": "Стендап",
-                                                          "organizerEmail": "ivan@example.com",
-                                                          "startTime": "2025-07-01T09:00:00Z",
-                                                          "endTime": "2025-07-01T10:00:00Z",
-                                                          "durationMinutes": 60,
-                                                          "status": "CONFIRMED",
-                                                          "createdAt": "2025-06-20T14:00:00Z",
-                                                          "updatedAt": "2025-06-20T14:05:00Z"
-                                                        }
-                                                      ]
-                                                    }
-                                                    """
-                                    )
-                            }
-                    )
-            )
-    })
+    @ApiResponse(
+            responseCode = "200",
+            description = "Результат проверки доступности",
+            content = @Content(schema = @Schema(implementation = AvailabilityResponse.class))
+    )
     @Tag(name = "Доступность")
     @GetMapping("/availability")
     public ResponseEntity<AvailabilityResponse> checkAvailable(
@@ -377,17 +232,8 @@ public class BookingController {
     }
 
     @Operation(
-            summary = "Количество активных бронирований комнаты",
-            operationId = "countActiveBookings"
+            summary = "Количество активных бронирований комнаты"
     )
-    @ApiResponse(responseCode = "200", description = "Количество активных бронирований",
-            content = @Content(
-                    mediaType = "application/json",
-                    // Для простых ответов (Map<String, Long>) можно описать схему inline
-                    examples = @ExampleObject(value = """
-                            { "activeBookings": 5 }
-                            """)
-            ))
     @GetMapping("/room/{roomId}/count")
     public ResponseEntity<Map<String, Long>> countActiveBookings(
             @Parameter(description = "ID комнаты", required = true, example = "1")
@@ -417,7 +263,6 @@ public class BookingController {
     })
     @PatchMapping("/{id}")
     public ResponseEntity<BookingResponse> updateBooking(
-            @Parameter(description = "ID бронирования", required = true, example = "42")
             @PathVariable Long id,
             @Valid @RequestBody UpdateBookingRequest request) {
 

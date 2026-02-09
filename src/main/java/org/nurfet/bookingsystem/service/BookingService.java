@@ -44,7 +44,7 @@ public class BookingService {
                 .orElseThrow(() -> new EntityNotFoundException("Booking", id));
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public BookingResponse createBooking(CreateBookingRequest request) {
         log.info("Creating booking for room {} from {} to {}",
                 request.roomId(), request.startTime(), request.endTime());

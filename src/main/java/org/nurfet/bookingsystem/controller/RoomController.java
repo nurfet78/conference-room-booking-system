@@ -40,76 +40,8 @@ public class RoomController {
                     """,
             operationId = "createRoom"
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "Комната успешно создана",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = RoomResponse.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Ошибка валидации входных данных",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class),
-                            // ExampleObject — конкретный пример тела ответа для этого статуса.
-                            // Помогает frontend-разработчикам понять формат ошибки.
-                            examples = @ExampleObject(
-                                    name = "validationError",
-                                    summary = "Ошибка валидации",
-                                    value = """
-                                            {
-                                              "timeStamp": "2025-06-15T10:30:00Z",
-                                              "status": 400,
-                                              "error": "Validation Failed",
-                                              "errorCode": "VALIDATION_ERROR",
-                                              "message": "Validation failed for one or more fields",
-                                              "path": "/api/v1/rooms",
-                                              "fieldErrors": [
-                                                {
-                                                  "field": "name",
-                                                  "message": "Room name is required",
-                                                  "rejectedValue": null
-                                                }
-                                              ]
-                                            }
-                                            """
-                            )
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Внутренняя ошибка сервера",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class)
-                    )
-            )
-    })
     @PostMapping
-    public ResponseEntity<RoomResponse> createRoom(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Данные для создания комнаты",
-                    required = true,
-                    content = @Content(
-                            schema = @Schema(implementation = CreateRoomRequest.class),
-                            examples = @ExampleObject(
-                                    name = "createRoomExample",
-                                    summary = "Пример создания комнаты",
-                                    value = """
-                                            {
-                                              "name": "Конференц-зал «Эверест»",
-                                              "capacity": 12,
-                                              "description": "3 этаж, проектор, маркерная доска, видеоконференцсвязь"
-                                            }
-                                            """
-                            )
-                    )
-            )
-            @Valid @RequestBody CreateRoomRequest request) {
+    public ResponseEntity<RoomResponse> createRoom(@Valid @RequestBody CreateRoomRequest request) {
 
         RoomResponse response = roomService.createRoom(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -120,31 +52,7 @@ public class RoomController {
             description = "Возвращает полную информацию о переговорной комнате по её уникальному идентификатору",
             operationId = "getRoomById"
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Комната найдена",
-                    content = @Content(schema = @Schema(implementation = RoomResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Комната не найдена",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class),
-                            examples = @ExampleObject(value = """
-                                    {
-                                      "timeStamp": "2025-06-15T10:30:00Z",
-                                      "status": 404,
-                                      "error": "Not Found",
-                                      "errorCode": "ROOM_NOT_FOUND",
-                                      "message": "Room with id 999 not found",
-                                      "path": "/api/v1/rooms/999"
-                                    }
-                                    """)
-                    )
-            )
-    })
+
     @GetMapping("/{id}")
     public ResponseEntity<RoomResponse> getRoom(
             @Parameter(
@@ -162,18 +70,7 @@ public class RoomController {
             description = "Возвращает все комнаты или только активные (при activeOnly=true)",
             operationId = "getAllRooms"
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Список комнат",
-                    // ArraySchema — для описания ответа-массива.
-                    // Без него Swagger покажет просто "array" без типа элементов.
-                    content = @Content(
-                            mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = RoomResponse.class))
-                    )
-            )
-    })
+
     @GetMapping
     public ResponseEntity<List<RoomResponse>> getRooms(
             @Parameter(
@@ -204,7 +101,6 @@ public class RoomController {
     })
     @PatchMapping("/{id}")
     public ResponseEntity<RoomResponse> updateRoom(
-            @Parameter(description = "ID комнаты для обновления", required = true, example = "1")
             @PathVariable Long id,
             @Valid @RequestBody UpdateRoomRequest request) {
 
@@ -229,7 +125,6 @@ public class RoomController {
     })
     @PostMapping("/{id}/deactivate")
     public ResponseEntity<RoomResponse> deactivateRoom(
-            @Parameter(description = "ID комнаты для деактивации", required = true, example = "1")
             @PathVariable Long id) {
         RoomResponse response = roomService.deactivateRoom(id);
         return ResponseEntity.ok(response);
