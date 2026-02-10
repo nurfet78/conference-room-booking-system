@@ -209,7 +209,7 @@ public class BookingService {
         Booking booking = bookingRepository.findByIdWithLock(id)
                 .orElseThrow(() -> new EntityNotFoundException("Booking", id));
 
-        if (!booking.getStatus().isActive()) {
+        if (!booking.isActive()) {
             throw new InvalidBookingStateException("Cannot update inactive booking");
         }
 
@@ -221,36 +221,37 @@ public class BookingService {
             throw new IllegalArgumentException("End time must be after start time");
         }
 
+        boolean roomChanged = !roomId.equals(booking.getRoom().getId());
         Room room = booking.getRoom();
-        if (request.roomId() != null && !request.roomId().equals(booking.getRoom().getId())) {
-            room = roomRepository.findByIdWithLock(request.roomId())
-                    .orElseThrow(() -> new EntityNotFoundException("Room", request.roomId()));
+
+        if (roomChanged) {
+            room = roomRepository.findByIdWithLock(roomId)
+                    .orElseThrow(() -> new EntityNotFoundException("Room", roomId));
 
             if (!room.isActive()) {
-                throw new RoomNotAvailableException(room.getId(), "Room is not active");
+                throw new RoomNotAvailableException(roomId, "Room is not active");
             }
         }
 
-        boolean timeOrRoomChanged = request.roomId() != null ||
-                request.startTime() != null ||
-                request.endTime() != null;
+        boolean timeChanged = request.startTime() != null || request.endTime() != null;
 
-        if (timeOrRoomChanged) {
+        if (roomChanged || timeChanged) {
             boolean hasConflict = bookingRepository.existsOverlappingBooking(
                     roomId, startTime, endTime, id);
-
             if (hasConflict) {
                 throw new BookingConflictException(roomId, startTime, endTime);
             }
         }
 
-        if (request.roomId() != null) {
+        if (roomChanged) {
             booking.changeRoom(room);
         }
+
         if (request.title() != null) {
             booking.setTitle(request.title());
         }
-        if (request.startTime() != null || request.endTime() != null) {
+
+        if (timeChanged) {
             booking.setTimeInterval(startTime, endTime);
         }
 
