@@ -275,27 +275,64 @@ curl "http://localhost:8080/api/v1/bookings/availability?roomId=1&startTime=2024
 void whenTenThreadsBookSameSlot_thenOnlyOneSucceeds() {
     int threads = 10;
     ExecutorService executor = Executors.newFixedThreadPool(threads);
-    CountDownLatch latch = new CountDownLatch(1);
+    CountDownLatch readyLatch = new CountDownLatch(threads);
+    CountDownLatch startLatch = new CountDownLatch(1);
+    CountDownLatch doneLatch = new CountDownLatch(threads);
+
     AtomicInteger successes = new AtomicInteger(0);
     AtomicInteger conflicts = new AtomicInteger(0);
+    AtomicInteger errors = new AtomicInteger(0);
 
     for (int i = 0; i < threads; i++) {
+        final int threadNum = i;
         executor.submit(() -> {
-            latch.await(); // Все стартуют одновременно
             try {
-                bookingService.createBooking(request);
+                CreateBookingRequest request = new CreateBookingRequest(
+                        testRoom.id(),
+                        "Встреча потока " + threadNum,
+                        "user" + threadNum + "@example.com",
+                        startTime,
+                        endTime
+                );
+
+                readyLatch.countDown();
+                startLatch.await();
+
+                // Каждый поток в своей транзакции
+                transactionTemplate.executeWithoutResult(status -> {
+                    bookingService.createBooking(request);
+                });
                 successes.incrementAndGet();
+
             } catch (BookingConflictException e) {
                 conflicts.incrementAndGet();
+            } catch (Exception e) {
+                // BookingConflictException может быть обёрнут
+                if (e.getCause() instanceof BookingConflictException) {
+                    conflicts.incrementAndGet();
+                } else {
+                    errors.incrementAndGet();
+                    System.err.println("Неожиданная ошибка: " + e.getMessage());
+                }
+            } finally {
+                doneLatch.countDown();
             }
         });
     }
-    
-    latch.countDown(); // Старт!
-    executor.awaitTermination(10, SECONDS);
 
+    readyLatch.await(5, TimeUnit.SECONDS);
+    startLatch.countDown();
+    boolean finished = doneLatch.await(30, TimeUnit.SECONDS);
+    executor.shutdown();
+
+    assertThat(finished).isTrue();
     assertThat(successes.get()).isEqualTo(1);
-    assertThat(conflicts.get()).isEqualTo(9);
+    assertThat(conflicts.get()).isEqualTo(threads - 1);
+    assertThat(errors.get()).isEqualTo(0);
+
+    // Проверяем что в БД только одно бронирование
+    Long count = transactionTemplate.execute(status -> bookingRepository.count());
+    assertThat(count).isEqualTo(1);
 }
 ```
 
