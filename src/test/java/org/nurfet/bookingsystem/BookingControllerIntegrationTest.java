@@ -291,12 +291,92 @@ class BookingControllerIntegrationTest extends AbstractIntegrationTest {
         }
     }
 
+    @Test
+    @DisplayName("PATCH /api/v1/bookings/{id}")
+    void updateBooking() {
+        BookingResponse bookingResponse = createBooking();
+
+        Instant start = Instant.parse("2026-02-18T10:00:00Z");
+        Instant end = Instant.parse("2026-02-18T12:00:00Z");
+
+        String json = """
+            {
+                "roomId": %d,
+                "title": "ВКС",
+                "startTime": "%s",
+                "endTime": "%s"
+            }
+            """.formatted(testRoom.id(), start, end);
+
+        webTestClient.patch()
+                .uri("/api/v1/bookings/{id}", bookingResponse.id())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(json)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(BookingResponse.class)
+                .value(response -> {
+                    assertThat(response.id()).isEqualTo(bookingResponse.id());
+                    assertThat(response.roomId()).isEqualTo(testRoom.id());
+                    assertThat(response.title()).isEqualTo("ВКС");
+                    assertThat(response.startTime()).isEqualTo(start);
+                    assertThat(response.endTime()).isEqualTo(end);
+                    // Email не меняется — проверяем что остался прежним
+                    assertThat(response.organizerEmail()).isEqualTo(bookingResponse.organizerEmail());
+                    assertThat(response.status()).isEqualTo(BookingStatus.PENDING);
+                });
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/bookings/{id} — только title")
+    void updateBookingTitleOnly() {
+        BookingResponse original = createBooking();
+
+        String json = """
+            {
+                "title": "Новое название"
+            }
+            """;
+
+        webTestClient.patch()
+                .uri("/api/v1/bookings/{id}", original.id())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(json)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(BookingResponse.class)
+                .value(response -> {
+                    assertThat(response.title()).isEqualTo("Новое название");
+                    // Остальные поля не изменились
+                    assertThat(response.startTime()).isEqualTo(original.startTime());
+                    assertThat(response.endTime()).isEqualTo(original.endTime());
+                    assertThat(response.roomId()).isEqualTo(original.roomId());
+                });
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/bookings/{id} — 404 если не найден")
+    void updateBookingNotFound() {
+        String json = """
+            {
+                "title": "Новое название"
+            }
+            """;
+
+        webTestClient.patch()
+                .uri("/api/v1/bookings/{id}", 999)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(json)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
     // Вспомогательный метод
     private BookingResponse createBooking() {
         CreateBookingRequest request = new CreateBookingRequest(
                 testRoom.id(),
                 "Test Meeting",
-                "test@example.com",
+                "admin@gmail.com",
                 Instant.now().plus(1, ChronoUnit.HOURS).truncatedTo(ChronoUnit.SECONDS),
                 Instant.now().plus(2, ChronoUnit.HOURS).truncatedTo(ChronoUnit.SECONDS)
         );
