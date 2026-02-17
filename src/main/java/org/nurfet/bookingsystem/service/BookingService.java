@@ -16,11 +16,10 @@ import org.nurfet.bookingsystem.repository.BookingRepository;
 import org.nurfet.bookingsystem.repository.RoomRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnThreading;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.management.InstanceAlreadyExistsException;
 import java.time.Instant;
 import java.util.List;
 
@@ -47,7 +46,6 @@ public class BookingService {
                 .orElseThrow(() -> new EntityNotFoundException("Booking", id));
     }
 
-    @Transactional
     public BookingResponse createBooking(CreateBookingRequest request) {
         log.info("Creating booking with {} from {} to {}",
                 request.roomId(), request.startTime(), request.endTime());
