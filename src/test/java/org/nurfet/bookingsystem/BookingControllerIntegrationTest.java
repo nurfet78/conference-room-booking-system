@@ -296,8 +296,8 @@ class BookingControllerIntegrationTest extends AbstractIntegrationTest {
     void updateBooking() {
         BookingResponse bookingResponse = createBooking();
 
-        Instant start = Instant.parse("2026-02-18T10:00:00Z");
-        Instant end = Instant.parse("2026-02-18T12:00:00Z");
+        Instant start = Instant.now().plus(2, ChronoUnit.HOURS).truncatedTo(ChronoUnit.SECONDS);
+        Instant end = Instant.now().plus(4, ChronoUnit.HOURS).truncatedTo(ChronoUnit.SECONDS);
 
         String json = """
             {
