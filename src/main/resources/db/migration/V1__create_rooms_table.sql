@@ -9,8 +9,7 @@ CREATE TABLE rooms (
     description     TEXT,
     is_active       BOOLEAN NOT NULL DEFAULT true,
     created_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    version         BIGINT NOT NULL DEFAULT 0
+    updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 COMMENT ON TABLE rooms IS 'Conference rooms available for booking';

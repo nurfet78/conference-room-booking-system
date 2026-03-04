@@ -15,7 +15,6 @@ public interface RoomMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "version", ignore = true)
     @Mapping(target = "active", ignore = true)
     Room toEntity(CreateRoomRequest request);
 

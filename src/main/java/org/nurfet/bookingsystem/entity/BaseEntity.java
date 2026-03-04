@@ -16,10 +16,6 @@ public abstract class BaseEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    @Version
-    @Column(name = "version", nullable = false)
-    private Long version;
-
     @PrePersist
     protected void prePersist() {  // protected — если подкласс захочет расширить
         Instant now = Instant.now();
