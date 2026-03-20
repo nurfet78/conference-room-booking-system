@@ -1,238 +1,258 @@
 package org.nurfet.bookingsystem.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.nurfet.bookingsystem.dto.error.ErrorResponse;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.nurfet.bookingsystem.exception.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.List;
+import java.net.URI;
 import java.util.Map;
+import java.util.Objects;
 
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+@Slf4j
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    // ========================
+    // Business exceptions
+    // ========================
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleEntityNotFound(
+    public ProblemDetail handleEntityNotFound(
             EntityNotFoundException ex, HttpServletRequest request) {
 
         log.debug("Entity not found: {}", ex.getMessage());
 
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(ErrorResponse.of(
-                        HttpStatus.NOT_FOUND.value(),
-                        "Not Found",
-                        ex.getErrorCode(),
-                        ex.getMessage(),
-                        request.getRequestURI()
-                ));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND, ex.getMessage());
+        problem.setTitle("Not Found");
+        problem.setProperty("errorCode", ex.getErrorCode());
+        problem.setInstance(URI.create(request.getRequestURI()));
+
+        return problem;
     }
 
     @ExceptionHandler(BookingConflictException.class)
-    public ResponseEntity<ErrorResponse> handleBookingConflict(
+    public ProblemDetail handleBookingConflict(
             BookingConflictException ex, HttpServletRequest request) {
 
         log.debug("Booking conflict: {}", ex.getMessage());
 
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(ErrorResponse.withDetails(
-                        HttpStatus.CONFLICT.value(),
-                        "Conflict",
-                        ex.getErrorCode(),
-                        ex.getMessage(),
-                        request.getRequestURI(),
-                        Map.of(
-                                "roomId", ex.getRoomId(),
-                                "requestedStart", ex.getRequestedStart().toString(),
-                                "requestedEnd", ex.getRequestedEnd().toString()
-                        )
-                ));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT, ex.getMessage());
+        problem.setTitle("Conflict");
+        problem.setProperty("errorCode", ex.getErrorCode());
+        problem.setInstance(URI.create(request.getRequestURI()));
+        problem.setProperty("roomId", ex.getRoomId());
+        problem.setProperty("requestedStart", ex.getRequestedStart().toString());
+        problem.setProperty("requestedEnd", ex.getRequestedEnd().toString());
+
+        return problem;
     }
 
     @ExceptionHandler(InvalidBookingStateException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidBookingState(InvalidBookingStateException ex,
-                                                                   HttpServletRequest request) {
+    public ProblemDetail handleInvalidBookingState(
+            InvalidBookingStateException ex, HttpServletRequest request) {
 
         log.debug("Invalid booking state: {}", ex.getMessage());
 
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(ErrorResponse.of(
-                        HttpStatus.CONFLICT.value(),
-                        "Conflict",
-                        ex.getErrorCode(),
-                        ex.getMessage(),
-                        request.getRequestURI()
-                ));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT, ex.getMessage());
+        problem.setTitle("Conflict");
+        problem.setProperty("errorCode", ex.getErrorCode());
+        problem.setInstance(URI.create(request.getRequestURI()));
+
+        return problem;
     }
 
     @ExceptionHandler(RoomNotAvailableException.class)
-    public ResponseEntity<ErrorResponse> handleRoomNotAvailable(
+    public ProblemDetail handleRoomNotAvailable(
             RoomNotAvailableException ex, HttpServletRequest request) {
 
         log.debug("Room not available: {}", ex.getMessage());
 
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(ErrorResponse.of(
-                        HttpStatus.CONFLICT.value(),
-                        "Unprocessable Entity",
-                        ex.getErrorCode(),
-                        ex.getMessage(),
-                        request.getRequestURI()
-                ));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
+        problem.setTitle("Unprocessable Entity");
+        problem.setProperty("errorCode", ex.getErrorCode());
+        problem.setInstance(URI.create(request.getRequestURI()));
+
+        return problem;
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex,
-                                                          HttpServletRequest request) {
+    // ========================
+    // Validation exceptions
+    // ========================
 
-        List<ErrorResponse.FieldError> fieldErrors = ex.getBindingResult()
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request) {
+
+        var fieldErrors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(fe -> new ErrorResponse.FieldError(
-                        fe.getField(),
-                        fe.getDefaultMessage(),
-                        fe.getRejectedValue()
+                .map(fe -> Map.<String, Object>of(
+                        "field", fe.getField(),
+                        "message", Objects.requireNonNullElse(
+                                fe.getDefaultMessage(), "Invalid value"),
+                        "rejectedValue", Objects.requireNonNullElse(
+                                fe.getRejectedValue(), "null")
                 )).toList();
 
         log.debug("Validation failed: {} errors", fieldErrors.size());
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse.ofValidation(
-                        HttpStatus.BAD_REQUEST.value(),
-                        "Validation failed",
-                        request.getRequestURI(),
-                        fieldErrors
-                ));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, "Validation failed");
+        problem.setTitle("Validation Failed");
+        problem.setProperty("errorCode", "VALIDATION_ERROR");
+        problem.setProperty("fieldErrors", fieldErrors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ProblemDetail handleConstraintViolation(
+            ConstraintViolationException ex, HttpServletRequest request) {
+
+        log.debug("Constraint violation: {}", ex.getMessage());
+
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, "Invalid request parameters");
+        problem.setTitle("Bad Request");
+        problem.setProperty("errorCode", "CONSTRAINT_VIOLATION");
+        problem.setInstance(URI.create(request.getRequestURI()));
+
+        return problem;
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex,
-                                                               HttpServletRequest request) {
+    public ProblemDetail handleIllegalArgument(
+            IllegalArgumentException ex, HttpServletRequest request) {
 
         log.debug("Illegal argument: {}", ex.getMessage());
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse.of(
-                        HttpStatus.BAD_REQUEST.value(),
-                        "Bad request",
-                        "INVALID_ARGUMENT",
-                        ex.getMessage(),
-                        request.getRequestURI()
-                ));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, ex.getMessage());
+        problem.setTitle("Bad Request");
+        problem.setProperty("errorCode", "INVALID_ARGUMENT");
+        problem.setInstance(URI.create(request.getRequestURI()));
+
+        return problem;
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex,
-                                                             HttpServletRequest request) {
+    // ========================
+    // Request format exceptions
+    // ========================
 
-        String message = ex.getMostSpecificCause().getMessage();
-
-        if (message != null && message.contains("excl_booking_overlap")) {
-            log.info("Booking overlap detected by database constraint");
-
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(ErrorResponse.of(
-                            HttpStatus.CONFLICT.value(),
-                            "Conflict",
-                            "BOOKING_CONFLICT",
-                            "THe requested time slot is no available",
-                            request.getRequestURI()
-                    ));
-        }
-
-        if (message != null && message.contains("unique")) {
-            log.debug("Unique constraint violation: {}", message);
-
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(ErrorResponse.of(
-                            HttpStatus.CONFLICT.value(),
-                            "Conflict",
-                            "DUPLICATE_ENTRY",
-                            "Resource already exists",
-                            request.getRequestURI()
-                    ));
-        }
-
-        log.error("Data integrity violation", ex);
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(ErrorResponse.of(
-                        HttpStatus.CONFLICT.value(),
-                        "Conflict",
-                        "DATA_INTEGRITY_ERROR",
-                        "Data integrity violation",
-                        request.getRequestURI()
-                ));
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleMessageNotReadable (HttpMessageNotReadableException ex,
-                                                                   HttpServletRequest request) {
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            org.springframework.http.converter.HttpMessageNotReadableException ex,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request) {
 
         log.debug("Message not readable: {}", ex.getMessage());
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse.of(
-                        HttpStatus.BAD_REQUEST.value(),
-                        "Bad request",
-                        "INVALID_REQUEST_BODY",
-                        "Invalid request body format",
-                        request.getRequestURI()
-                ));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, "Invalid request body format");
+        problem.setTitle("Bad Request");
+        problem.setProperty("errorCode", "INVALID_REQUEST_BODY");
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex,
-                                                            HttpServletRequest request) {
+    public ProblemDetail handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
 
-        String message = String.format("Parameter '%s' must be of type %s",
+        String detail = String.format("Parameter '%s' must be of type %s",
                 ex.getName(),
-                ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown");
+                ex.getRequiredType() != null
+                        ? ex.getRequiredType().getSimpleName()
+                        : "unknown");
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse.of(
-                        HttpStatus.BAD_REQUEST.value(),
-                        "Bad request",
-                        "TYPE_MISMATCH",
-                        message,
-                        request.getRequestURI()
-                ));
+        log.debug("Type mismatch: {}", detail);
+
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST, detail);
+        problem.setTitle("Bad Request");
+        problem.setProperty("errorCode", "TYPE_MISMATCH");
+        problem.setInstance(URI.create(request.getRequestURI()));
+
+        return problem;
     }
 
+    // ========================
+    // Data integrity
+    // ========================
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleDataIntegrity(
+            DataIntegrityViolationException ex, HttpServletRequest request) {
+
+        String cause = ex.getMostSpecificCause().getMessage();
+        URI instance = URI.create(request.getRequestURI());
+
+        if (cause != null && cause.contains("excl_booking_overlap")) {
+            log.info("Booking overlap detected by database constraint");
+
+            ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                    HttpStatus.CONFLICT, "The requested time slot is not available");
+            problem.setTitle("Conflict");
+            problem.setProperty("errorCode", "BOOKING_CONFLICT");
+            problem.setInstance(instance);
+            return problem;
+        }
+
+        if (cause != null && cause.contains("unique")) {
+            log.debug("Unique constraint violation: {}", cause);
+
+            ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                    HttpStatus.CONFLICT, "Resource already exists");
+            problem.setTitle("Conflict");
+            problem.setProperty("errorCode", "DUPLICATE_ENTRY");
+            problem.setInstance(instance);
+            return problem;
+        }
+
+        log.error("Data integrity violation", ex);
+
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT, "Data integrity violation");
+        problem.setTitle("Conflict");
+        problem.setProperty("errorCode", "DATA_INTEGRITY_ERROR");
+        problem.setInstance(instance);
+        return problem;
+    }
+
+    // ========================
+    // Catch-all
+    // ========================
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneral(Exception ex, HttpServletRequest request) {
+    public ProblemDetail handleGeneral(Exception ex, HttpServletRequest request) {
 
         log.error("Unexpected error", ex);
 
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse.of(
-                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                        "Internal Server Error",
-                        "INTERNAL_ERROR",
-                        "An unexpected error occurred",
-                        request.getRequestURI()
-                ));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+        problem.setTitle("Internal Server Error");
+        problem.setProperty("errorCode", "INTERNAL_ERROR");
+        problem.setInstance(URI.create(request.getRequestURI()));
+
+        return problem;
     }
 }

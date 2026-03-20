@@ -6,7 +6,7 @@ public class EntityNotFoundException extends BusinessException {
         super("ОБЪЕКТ НЕ НАЙДЕН", entityName + " с id " + id + " не найден");
     }
 
-    public EntityNotFoundException(String entityName, String identifier) {
-        super("ОБЪЕКТ НЕ НАЙДЕН", entityName + " '" + identifier + " 'not found");
+    public EntityNotFoundException(String entityName, String value) {
+        super("ОБЪЕКТ НЕ НАЙДЕН", entityName + " '" + value + " 'не найден");
     }
 }

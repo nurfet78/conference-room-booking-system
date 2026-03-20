@@ -27,6 +27,8 @@ spring:
     hidden method:
       filter:
         enabled: true
+    problemdetails:
+      enabled: true
   app:
     scheduling:
       expiredBookingsRate: 1m

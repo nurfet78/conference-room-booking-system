@@ -26,13 +26,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                         org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
         and b.startTime < :endTime
         and b.endTime > :startTime
-        and (:excludeBookingId is null or b.id <> :excludeBookingId)
+        and (:excludeId is null or b.id <> :excludeId)
     )
 """)
     boolean existsOverlappingBooking(@Param("roomId")Long roomId,
                                      @Param("startTime")Instant startTime,
                                      @Param("endTime")Instant endTime,
-                                     @Param("excludeBookingId")Long excludeBookingId);
+                                     @Param("excludeId")Long excludeId);
 
     default boolean existsOverlappingBooking(@Param("roomId")Long roomId,
                                              @Param("startTime")Instant startTime,
@@ -42,31 +42,29 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("""
     select b
-        from Booking b
-        where b.room.id = :roomId
-        and b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
+    from Booking b
+    where b.room.id = :roomId
+    and b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
                         org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
-        and b.startTime < :endTime
-        and b.endTime > :startTime
-        order by b.startTime
+    and b.startTime < :endTime
+    and b.endTime > :startTime
+    order by b.startTime
 """)
     List<Booking> findOverlappingBooking(@Param("roomId")Long roomId,
                                          @Param("startTime")Instant startTime,
                                          @Param("endTime")Instant endTime);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("""
-    select b from Booking b where b.id = :id
-""")
+    @Query("select b from Booking b where b.id = :id")
     Optional<Booking> findByIdWithLock(@Param("id")Long id);
 
     @Query("""
     select b
-        from Booking b
-        where b.room.id = :roomId
-        and b.startTime < :endTime
-        and b.endTime > :startTime
-        order by b.startTime
+    from Booking b
+    where b.room.id = :roomId
+    and b.startTime < :endTime
+    and b.endTime > :startTime
+    order by b.startTime
 """)
     List<Booking> findByRoomAndTimeRange(@Param("roomId")Long roomId,
                                          @Param("startTime")Instant startTime,
@@ -74,51 +72,51 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("""
     select b
-        from Booking b
-        where b.room.id = :roomId
-        and b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
-                        org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
-        and b.endTime > :now
-        order by b.startTime
+    from Booking b
+    where b.room.id = :roomId
+    and b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
+                    org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
+    and b.endTime > :now
+    order by b.startTime
 """)
-    List<Booking> findActiveBookingsByRoom(@Param("roomId")Long roomId,
-                                           @Param("now")Instant now);
+    List<Booking> findActiveByRoom(@Param("roomId")Long roomId,
+                                   @Param("now")Instant now);
 
     @Query("""
     select b
-        from Booking b
-        where b.organizerEmail = :organizerEmail
-        order by b.startTime desc
+    from Booking b
+    where b.organizerEmail = :email
+    order by b.startTime desc
 """)
-    List<Booking> findByOrganizerEmail(@Param("organizerEmail")String organizerEmail);
+    List<Booking> findByOrganizerEmail(@Param("email")String email);
 
     @Query("""
     select b
-        from Booking b
-        where b.status = :status
-        order by b.startTime
+    from Booking b
+    where b.status = :status
+    order by b.startTime
 """)
     List<Booking> findByStatus(@Param("status")BookingStatus status);
 
     @Modifying
     @Query("""
     update Booking b
-        set b.status = org.nurfet.bookingsystem.entity.BookingStatus.EXPIRED,
-        b.updatedAt = CURRENT_TIMESTAMP
-        where b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
-                        org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
-        and b.endTime < :now
+    set b.status = org.nurfet.bookingsystem.entity.BookingStatus.EXPIRED,
+        b.updatedAt = :now
+    where b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
+                      org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
+    and b.endTime < :now
 """)
     int markExpiredBookings(@Param("now")Instant now);
 
     @Query("""
     select count(b)
-        from Booking b
-        where b.room.id = :roomId
-        and b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
-                        org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
-        and b.endTime > :now
+    from Booking b
+    where b.room.id = :roomId
+    and b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
+                    org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
+    and b.endTime > :now
 """)
-    long countActiveBookingsRoom(@Param("roomId")Long roomId,
-                                 @Param("now")Instant now);
+    long countActiveBookings(@Param("roomId")Long roomId,
+                             @Param("now")Instant now);
 }

@@ -1,32 +1,31 @@
 package org.nurfet.bookingsystem.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.nurfet.bookingsystem.dto.spec.RoomFilter;
+import org.nurfet.bookingsystem.specification.RoomSpecification;
 import org.nurfet.bookingsystem.dto.request.UpdateRoomRequest;
 import org.nurfet.bookingsystem.exception.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.nurfet.bookingsystem.dto.request.CreateRoomRequest;
 import org.nurfet.bookingsystem.dto.response.RoomResponse;
 import org.nurfet.bookingsystem.entity.Room;
 import org.nurfet.bookingsystem.mapper.room.RoomMapper;
 import org.nurfet.bookingsystem.repository.RoomRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-
 @Service
+@Slf4j
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RoomService {
-
-    private static final Logger log = LoggerFactory.getLogger(RoomService.class);
 
     private final RoomRepository roomRepository;
     private final RoomMapper roomMapper;
-
-    public RoomService(RoomRepository roomRepository, RoomMapper roomMapper) {
-        this.roomRepository = roomRepository;
-        this.roomMapper = roomMapper;
-    }
 
     private Room findRoomById(Long id) {
         return roomRepository.findById(id)
@@ -39,42 +38,29 @@ public class RoomService {
 
         Room room = roomMapper.toEntity(request);
         Room saved = roomRepository.save(room);
+        log.info("Room with id: {} created", saved.getId());
 
-        log.info("Room created with id: {}", saved.getId());
         return roomMapper.toResponse(saved);
     }
 
     @Transactional
-    public RoomResponse getRoom(Long id) {
-        Room room = findRoomById(id);
-        return roomMapper.toResponse(room);
-    }
-
-    @Transactional(readOnly = true)
-    public List<RoomResponse> getAllRooms() {
-        return roomMapper.toResponseList(roomRepository.findAll());
-    }
-
-    @Transactional(readOnly = true)
-    public List<RoomResponse> getActiveRooms() {
-        return roomMapper.toResponseList(roomRepository.findByActiveTrue());
-    }
-
-    @Transactional
     public RoomResponse updateRoom(Long id, UpdateRoomRequest request) {
-        log.info("Updating room: {}", id);
+        log.info("Updating room with id: {}", id);
 
         Room room = findRoomById(id);
 
         if (request.name() != null) {
             room.setName(request.name());
         }
+
         if (request.capacity() != null) {
             room.setCapacity(request.capacity());
         }
+
         if (request.description() != null) {
             room.setDescription(request.description());
         }
+
         if (request.active() != null) {
             if (request.active()) {
                 room.activate();
@@ -83,22 +69,35 @@ public class RoomService {
             }
         }
 
-        Room saved = roomRepository.save(room);
-        log.info("Room updated: {}", id);
+        log.info("Room with id {} updated", room.getId());
 
-        return roomMapper.toResponse(saved);
+        return roomMapper.toResponse(room);
+    }
+
+    public RoomResponse getRoom(Long id) {
+        Room room = findRoomById(id);
+        return roomMapper.toResponse(room);
+    }
+
+    public Page<RoomResponse> getRooms(Pageable pageable) {
+        return searchRooms(RoomFilter.empty(), pageable);
+    }
+
+    public Page<RoomResponse> searchRooms(RoomFilter filter, Pageable pageable) {
+        return roomRepository.findAll(RoomSpecification.fromFilter(filter), pageable)
+                .map(roomMapper::toResponse);
     }
 
     @Transactional
     public RoomResponse deactivateRoom(Long id) {
-        log.info("Deactivating room: {}", id);
+        log.info("Deactivating room with id: {}", id);
 
         Room room = findRoomById(id);
         room.deactivate();
 
-        Room saving = roomRepository.save(room);
-        log.info("Room deactivated: {}", id);
+        Room saved = roomRepository.save(room);
+        log.info("Room with id: {} deactivated", saved.getId());
 
-        return roomMapper.toResponse(saving);
+        return roomMapper.toResponse(saved);
     }
 }
