@@ -16,12 +16,9 @@ import org.nurfet.bookingsystem.mapper.room.RoomMapper;
 import org.nurfet.bookingsystem.repository.RoomRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
-@Slf4j
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Slf4j
 public class RoomService {
 
     private final RoomRepository roomRepository;
@@ -69,23 +66,26 @@ public class RoomService {
             }
         }
 
-        log.info("Room with id {} updated", room.getId());
+        log.info("Room with id {} updated", id);
 
         return roomMapper.toResponse(room);
     }
 
+    @Transactional(readOnly = true)
     public RoomResponse getRoom(Long id) {
         Room room = findRoomById(id);
         return roomMapper.toResponse(room);
     }
 
-    public Page<RoomResponse> getRooms(Pageable pageable) {
-        return searchRooms(RoomFilter.empty(), pageable);
-    }
-
-    public Page<RoomResponse> searchRooms(RoomFilter filter, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<RoomResponse> searchRoom(RoomFilter filter, Pageable pageable) {
         return roomRepository.findAll(RoomSpecification.fromFilter(filter), pageable)
                 .map(roomMapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<RoomResponse> getRooms(Pageable pageable) {
+        return searchRoom(RoomFilter.empty(), pageable);
     }
 
     @Transactional

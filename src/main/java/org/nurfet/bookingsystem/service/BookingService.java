@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.nurfet.bookingsystem.dto.request.CreateBookingRequest;
 import org.nurfet.bookingsystem.dto.request.UpdateBookingRequest;
+import org.nurfet.bookingsystem.dto.response.ActiveBookingsCountResponse;
+import org.nurfet.bookingsystem.dto.response.AvailabilityResponse;
 import org.nurfet.bookingsystem.dto.response.BookingResponse;
 import org.nurfet.bookingsystem.entity.Booking;
 import org.nurfet.bookingsystem.entity.BookingStatus;
@@ -22,8 +24,8 @@ import java.time.Instant;
 import java.util.List;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 public class BookingService {
 
     private final BookingRepository bookingRepository;
@@ -81,6 +83,7 @@ public class BookingService {
         Instant startTime = request.startTime() != null ? request.startTime() : booking.getStartTime();
         Instant endTime = request.endTime() != null ? request.endTime() : booking.getEndTime();
 
+
         if (!endTime.isAfter(startTime)) {
             throw new IllegalArgumentException("End time must be after start time");
         }
@@ -97,7 +100,8 @@ public class BookingService {
             }
         }
 
-        boolean timeChanged = request.startTime() != null || request.endTime() != null;
+        boolean timeChanged = !booking.getStartTime().equals(startTime) ||
+                              !booking.getEndTime().equals(endTime);
 
         if (roomChanged || timeChanged) {
             boolean hasConflict = bookingRepository.existsOverlappingBooking(roomId,
@@ -120,7 +124,7 @@ public class BookingService {
             booking.setTimeInterval(startTime, endTime);
         }
 
-        log.info("Booking with id: {} updated", booking.getId());
+        log.info("Booking with id: {} updated", id);
 
         return bookingMapper.toResponse(booking);
     }
@@ -137,7 +141,7 @@ public class BookingService {
             throw new EntityNotFoundException("Room", roomId);
         }
 
-        List<Booking> bookings = bookingRepository.findByRoomAndTimeRange(roomId, from, to);
+        List<Booking> bookings = bookingRepository.findBookingByRoomAndTimeRange(roomId, from, to);
         return bookingMapper.toResponseList(bookings);
     }
 
@@ -147,11 +151,11 @@ public class BookingService {
             throw new EntityNotFoundException("Room", roomId);
         }
 
-        List<Booking> bookings = bookingRepository.findActiveByRoom(roomId, Instant.now());
+        List<Booking> bookings = bookingRepository.findActiveBookingByRoom(roomId, Instant.now());
         return bookingMapper.toResponseList(bookings);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<BookingResponse> getBookingsByOrganizerEmail(String email) {
         List<Booking> bookings = bookingRepository.findByOrganizerEmail(email);
         return bookingMapper.toResponseList(bookings);
@@ -159,7 +163,7 @@ public class BookingService {
 
     @Transactional
     public BookingResponse confirmBooking(Long id) {
-        log.info("Confirming booking with id: {}", id);
+        log.info("Conforming booking with id: {}", id);
         Booking booking = findBookingById(id);
 
         try {
@@ -169,7 +173,7 @@ public class BookingService {
         }
 
         Booking saved = bookingRepository.save(booking);
-        log.info("Booking with id: {} confirmed", saved.getId());
+        log.info("Booking with id: {} confirmed", id);
 
         return bookingMapper.toResponse(saved);
     }
@@ -186,38 +190,13 @@ public class BookingService {
         }
 
         Booking saved = bookingRepository.save(booking);
-        log.info("Booking with id: {} cancelled", saved.getId());
+        log.info("Booking with id: {} cancelled", id);
 
         return bookingMapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
-    public boolean isTimeSlotAvailable(Long roomId,
-                                       Instant startTime,
-                                       Instant endTime) {
-
-        if (!roomRepository.existsById(roomId)) {
-            throw new EntityNotFoundException("Room", roomId);
-        }
-
-        return !bookingRepository.existsOverlappingBooking(roomId, startTime, endTime);
-    }
-
-    @Transactional(readOnly = true)
-    public List<BookingResponse> findConflictingBookings(Long roomId,
-                                                         Instant startTime,
-                                                         Instant endTime) {
-
-        if (!roomRepository.existsById(roomId)) {
-            throw new EntityNotFoundException("Room", roomId);
-        }
-
-        List<Booking> bookings = bookingRepository.findOverlappingBooking(roomId, startTime, endTime);
-        return bookingMapper.toResponseList(bookings);
-    }
-
-    @Transactional(readOnly = true)
-    public List<BookingResponse> findBookingsByStatus(BookingStatus status) {
+    public List<BookingResponse> getBookingByStatus(BookingStatus status) {
         List<Booking> bookings = bookingRepository.findByStatus(status);
         return bookingMapper.toResponseList(bookings);
     }
@@ -234,11 +213,25 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
-    public long countActiveBookingsByRoom(Long roomId) {
+    public ActiveBookingsCountResponse countActiveBookingsByRoom(Long roomId) {
         if (!roomRepository.existsById(roomId)) {
             throw new EntityNotFoundException("Room", roomId);
         }
 
-        return bookingRepository.countActiveBookings(roomId, Instant.now());
+        return new ActiveBookingsCountResponse(bookingRepository.countActiveBookingsByRoom(roomId, Instant.now()));
+    }
+
+    @Transactional(readOnly = true)
+    public AvailabilityResponse checkAvailability(Long roomId, Instant startTime, Instant endTime) {
+        if (!roomRepository.existsById(roomId)) {
+            throw new EntityNotFoundException("Room", roomId);
+        }
+
+        if (!bookingRepository.existsOverlappingBooking(roomId, startTime, endTime)) {
+            return AvailabilityResponse.free();
+        }
+
+        List<Booking> conflicts = bookingRepository.findOverlappingBooking(roomId, startTime, endTime);
+        return AvailabilityResponse.unavailable(bookingMapper.toResponseList(conflicts));
     }
 }

@@ -3,18 +3,18 @@ package org.nurfet.bookingsystem.entity;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(
-        description = "Статус бронирования переговорной комнаты",
-        enumAsRef = true  // Генерирует $ref вместо inline-определения — чище схема
+        description = "Статус бронирования переговорной",
+        enumAsRef = true
 )
 public enum BookingStatus {
 
-    @Schema(description = "Ожидает подтверждения")
+    @Schema(description = "Ждет подтверждения")
     PENDING,
 
-    @Schema(description = "Подтверждено организатором")
+    @Schema(description = "Подтвержден организатором")
     CONFIRMED,
 
-    @Schema(description = "Отменено")
+    @Schema(description = "Отменен")
     CANCELLED,
 
     @Schema(description = "Время бронирования истекло")
@@ -29,6 +29,7 @@ public enum BookingStatus {
     }
 
     public boolean isConfirmable() {
-        return this == PENDING;
+        return
+                this == PENDING;
     }
 }

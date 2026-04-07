@@ -8,12 +8,14 @@ CREATE TABLE bookings (
     organizer_email VARCHAR(255) NOT NULL,
     start_time      TIMESTAMP WITH TIME ZONE NOT NULL,
     end_time        TIMESTAMP WITH TIME ZONE NOT NULL,
-    status          VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    status          VARCHAR(20) NOT NULL DEFAULT 'PENDING'
+                    CHECK (status IN ('PENDING', 'CONFIRMED', 'CANCELLED', 'EXPIRED')),
     created_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
     -- end_time > start_time
     CONSTRAINT chk_booking_time_order CHECK (end_time > start_time),
+
     
     -- Минимальная длительность 15 минут
     CONSTRAINT chk_booking_min_duration CHECK (

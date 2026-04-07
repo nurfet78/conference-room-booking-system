@@ -1,124 +1,121 @@
 package org.nurfet.bookingsystem.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import org.hibernate.sql.Update;
 import org.nurfet.bookingsystem.dto.request.CreateBookingRequest;
 import org.nurfet.bookingsystem.dto.request.UpdateBookingRequest;
+import org.nurfet.bookingsystem.dto.response.ActiveBookingsCountResponse;
 import org.nurfet.bookingsystem.dto.response.AvailabilityResponse;
 import org.nurfet.bookingsystem.dto.response.BookingResponse;
 import org.nurfet.bookingsystem.entity.BookingStatus;
-import org.nurfet.bookingsystem.repository.BookingRepository;
 import org.nurfet.bookingsystem.service.BookingService;
-import org.springdoc.core.service.GenericResponseService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
 @RequiredArgsConstructor
 @Tag(name = "Бронирования")
+@Validated
 public class BookingController {
 
     private final BookingService bookingService;
 
+    @Operation(summary = "Создать бронирование")
+    @ApiResponse(responseCode = "201", description = "Бронирование создано")
+    @ApiResponse(responseCode = "400", description = "Ошибка валидации или конфликт времени")
+    @ApiResponse(responseCode = "404", description = "Комната не найдена")
     @PostMapping
-    public ResponseEntity<BookingResponse> createBooking(@Valid @RequestBody CreateBookingRequest request) {
-        BookingResponse response = bookingService.createBooking(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @ResponseStatus(HttpStatus.CREATED)
+    public BookingResponse createBooking(@Validated @RequestBody CreateBookingRequest request) {
+        return bookingService.createBooking(request);
     }
 
+    @Operation(summary = "Обновить бронирование (частично)")
+    @ApiResponse(responseCode = "400", description = "Ошибка валидации или конфликт времени")
+    @ApiResponse(responseCode = "404", description = "Бронирование не найдено")
     @PatchMapping("/{id}")
-    public ResponseEntity<BookingResponse> updateBooking(@PathVariable Long id,
-                                                         @Valid @RequestBody UpdateBookingRequest request) {
-
-        BookingResponse response = bookingService.updateBooking(id, request);
-        return ResponseEntity.ok(response);
+    public BookingResponse updateBooking(@PathVariable Long id,
+                                         @Valid @RequestBody UpdateBookingRequest request) {
+        return bookingService.updateBooking(id, request);
     }
 
+    @Operation(summary = "Получить бронирование по ID")
+    @ApiResponse(responseCode = "404", description = "Бронирование не найдено")
     @GetMapping("/{id}")
-    public ResponseEntity<BookingResponse> getBooking(@PathVariable Long id) {
-        BookingResponse response = bookingService.getBooking(id);
-        return ResponseEntity.ok(response);
+    public BookingResponse getBooking(@PathVariable Long id) {
+        return bookingService.getBooking(id);
     }
 
+    @Operation(summary = "Бронирования за период")
+    @ApiResponse(responseCode = "404", description = "Комната не найдена")
     @GetMapping("/room/{roomId}")
-    public ResponseEntity<List<BookingResponse>> getBookingByRoomAndTimeRange(
+    public List<BookingResponse> getByRoomAndTimeRange(
             @PathVariable Long roomId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant from,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant to) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)Instant from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)Instant to) {
 
-        List<BookingResponse> responses = bookingService.getBookingByRoomAndTimeRange(roomId, from, to);
-        return ResponseEntity.ok(responses);
+        return bookingService.getBookingByRoomAndTimeRange(roomId, from, to);
     }
 
+    @Operation(summary = "Активные бронирования комнаты")
     @GetMapping("/room/{roomId}/active")
-    public ResponseEntity<List<BookingResponse>> getActiveBookingsByRoom(@PathVariable Long roomId) {
-        List<BookingResponse> responses = bookingService.getActiveBookingsByRoom(roomId);
-        return ResponseEntity.ok(responses);
+    public List<BookingResponse> getActiveBookingsByRoom(@PathVariable Long roomId) {
+        return bookingService.getActiveBookingsByRoom(roomId);
     }
 
+    @Operation(summary = "Бронирования по email организатора")
     @GetMapping("/organizer")
-    public ResponseEntity<List<BookingResponse>> getByOrganizer(@RequestParam @Email String email) {
-        List<BookingResponse> responses = bookingService.getBookingsByOrganizerEmail(email);
-        return ResponseEntity.ok(responses);
+    public List<BookingResponse> getByOrganizer(@RequestParam @NotBlank @Email String email) {
+        return bookingService.getBookingsByOrganizerEmail(email);
     }
 
+    @Operation(summary = "Бронирования по статусу")
     @GetMapping("/status")
-    public ResponseEntity<List<BookingResponse>> getByStatus(@RequestParam BookingStatus status) {
-        List<BookingResponse> responses = bookingService.findBookingsByStatus(status);
-        return ResponseEntity.ok(responses);
+    public List<BookingResponse> getByStatus(@RequestParam BookingStatus status) {
+        return bookingService.getBookingByStatus(status);
     }
 
+    @Operation(summary = "Подтвердить бронирование")
+    @ApiResponse(responseCode = "400", description = "Неверный статус для подтверждения")
+    @ApiResponse(responseCode = "404", description = "Бронирование не найдено")
     @PostMapping("/{id}/confirm")
-    public ResponseEntity<BookingResponse> confirmBooking(@PathVariable Long id) {
-        BookingResponse response = bookingService.confirmBooking(id);
-        return ResponseEntity.ok(response);
+    public BookingResponse confirmBooking(@PathVariable Long id) {
+        return bookingService.confirmBooking(id);
     }
 
+    @Operation(summary = "Отменить бронирование")
+    @ApiResponse(responseCode = "400", description = "Бронирование нельзя отменить")
+    @ApiResponse(responseCode = "404", description = "Бронирование не найдено")
     @PostMapping("/{id}/cancel")
-    public ResponseEntity<BookingResponse> cancelBooking(@PathVariable Long id) {
-        BookingResponse response = bookingService.cancelBooking(id);
-        return ResponseEntity.ok(response);
+    public BookingResponse cancelBooking(@PathVariable Long id) {
+        return bookingService.cancelBooking(id);
     }
 
+    @Operation(summary = "Проверить доступность временного слота")
+    @Tag(name = "Доступность")
     @GetMapping("/availability")
-    public ResponseEntity<AvailabilityResponse> checkAvailable(
+    public AvailabilityResponse checkAvailable(
             @RequestParam Long roomId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startTime,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endTime) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)Instant startTime,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)Instant endTime) {
 
-        boolean available = bookingService.isTimeSlotAvailable(roomId, startTime, endTime);
-
-        if (available) {
-            return ResponseEntity.ok(AvailabilityResponse.free());
-        } else {
-            List<BookingResponse> conflicts = bookingService.findConflictingBookings(roomId, startTime, endTime);
-            return ResponseEntity.ok(AvailabilityResponse.unavailable(conflicts));
-        }
+        return bookingService.checkAvailability(roomId, startTime, endTime);
     }
 
+    @Operation(summary = "Количество активных бронирований комнаты")
     @GetMapping("/room/{roomId}/count")
-    public ResponseEntity<Map<String, Long>> countActiveBookingsByRoom(@PathVariable Long roomId) {
-        long count = bookingService.countActiveBookingsByRoom(roomId);
-
-        return ResponseEntity.ok(Map.of("ActiveBookings", count));
+    public ActiveBookingsCountResponse countActiveBookings(@PathVariable Long roomId) {
+        return bookingService.countActiveBookingsByRoom(roomId);
     }
 }

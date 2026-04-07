@@ -2,24 +2,23 @@ package org.nurfet.bookingsystem.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.nurfet.bookingsystem.repository.RoomRepository;
+import org.springframework.data.convert.Jsr310Converters;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Objects;
 
 @Entity
 @Table(name = "bookings")
+@NoArgsConstructor
 @Getter
 public class Booking extends BaseEntity {
 
     private static final Duration MIN_DURATION = Duration.ofMinutes(15);
     private static final Duration MAX_DURATION = Duration.ofHours(8);
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "room_id", nullable = false)
@@ -39,32 +38,51 @@ public class Booking extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private BookingStatus status = BookingStatus.PENDING;
-
-    protected Booking() {
-
-    }
+    private BookingStatus status;
 
     public void changeRoom(Room room) {
         this.room = Objects.requireNonNull(room, "Room cannot be null");
     }
 
-    public Booking(Room room, String title, String organizerEmail,
-                   Instant startTime, Instant endTime) {
+    public void setTitle(String title) {
+        this.title = Objects.requireNonNull(title, "Title cannot be null");
+    }
 
-        this.room = Objects.requireNonNull(room, "Room cannot be null");
-        this.title = title;
-        this.organizerEmail = Objects.requireNonNull(organizerEmail, "Organizer email cannot be null");
-        setTimeInterval(startTime, endTime);
-        this.status = BookingStatus.PENDING;
+    public void setTimeInterval(Instant startTime, Instant endTime) {
+        Objects.requireNonNull(startTime, "Start time cannot be null");
+        Objects.requireNonNull(endTime, "End time cannot be null");
+
+        if (!endTime.isAfter(startTime)) {
+            throw new IllegalArgumentException("End time must be after start time");
+        }
+
+        Duration duration = Duration.between(startTime, endTime);
+
+        if (duration.compareTo(MIN_DURATION) < 0) {
+            throw new IllegalArgumentException("Booking duration must be at least " +
+                    MIN_DURATION.toMinutes() + " minutes");
+        }
+
+        if (duration.compareTo(MAX_DURATION) > 0) {
+            throw new IllegalArgumentException("Booking duration cannot exceed " +
+                    MAX_DURATION.toHours() + " hours");
+        }
+
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 
     public Duration getDuration() {
         return Duration.between(startTime, endTime);
     }
 
-    public boolean overlaps(Instant otherStart, Instant otherEnd) {
-        return this.startTime.isBefore(otherEnd) && this.endTime.isAfter(otherStart);
+    public Booking(Room room, String title, String organizerEmail,
+                   Instant startTime, Instant endTime) {
+        this.room = Objects.requireNonNull(room, "Room cannot be null");
+        this.title = Objects.requireNonNull(title, "Title cannot be null");
+        this.organizerEmail = Objects.requireNonNull(organizerEmail, "Organizer email cannot be null");
+        setTimeInterval(startTime, endTime);
+        this.status = BookingStatus.PENDING;
     }
 
     public boolean isActive() {
@@ -73,6 +91,10 @@ public class Booking extends BaseEntity {
 
     public boolean isExpired() {
         return endTime.isBefore(Instant.now());
+    }
+
+    public boolean overlaps(Instant otherStart, Instant otherEnd) {
+        return startTime.isBefore(otherEnd) && endTime.isAfter(otherStart);
     }
 
     public void confirm() {
@@ -95,54 +117,9 @@ public class Booking extends BaseEntity {
         this.status = BookingStatus.CANCELLED;
     }
 
-    public void markAsExpired() {
-        if (status.isActive()) {
-            this.status = BookingStatus.EXPIRED;
-        }
-    }
-
-    public void setTitle(String title) {
-        this.title = Objects.requireNonNull(title, "Title cannot be null");
-    }
-
-    public void setTimeInterval(Instant startTime, Instant endTime) {
-        Objects.requireNonNull(startTime, "Start time cannot be null");
-        Objects.requireNonNull(endTime, "End time cannot be null");
-
-        if (!endTime.isAfter(startTime)) {
-            throw new IllegalArgumentException("End time must be after start time");
-        }
-
-        Duration duration = Duration.between(startTime, endTime);
-
-        if (duration.compareTo(MIN_DURATION) < 0) {
-            throw new IllegalArgumentException("Booking duration must be at least " + MIN_DURATION.toMinutes() + " minutes");
-        }
-
-        if (duration.compareTo(MAX_DURATION) > 0) {
-            throw new IllegalArgumentException("Booking duration cannot exceed " + MAX_DURATION.toHours() + " hours");
-        }
-
-        this.startTime = startTime;
-        this.endTime = endTime;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Booking booking = (Booking) o;
-        return Objects.equals(id, booking.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
-
     @Override
     public String toString() {
-        return "Booking{" +
-                "id=" + id +
+        return "Booking{" + "id=" + getId() +
                 ", room=" + room +
                 ", title='" + title + '\'' +
                 ", organizerEmail='" + organizerEmail + '\'' +
