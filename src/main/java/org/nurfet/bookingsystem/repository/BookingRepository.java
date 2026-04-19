@@ -24,10 +24,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("""
     select exists (
         select 1
-        from Booking b
+        from Booking  b
         where b.room.id = :roomId
-        and b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
-                        org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
+        and b.status in (org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
+                         org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
         and b.startTime < :endTime
         and b.endTime > :startTime
         and (:excludeId is null or b.id <> :excludeId)
@@ -48,8 +48,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     select b
     from Booking b
     where b.room.id = :roomId
+<<<<<<< HEAD
     and b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
                     org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
+=======
+    and b.status in (org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
+                     org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
+>>>>>>> ec97005a88fa2d730bbad206fc8e9ec92c3beca5
     and b.startTime < :endTime
     and b.endTime > :startTime
     order by b.startTime
@@ -61,38 +66,39 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("""
     select b
     from Booking b
-    where b.room.id = :roomId
+    where b.room.id = :id
     and b.startTime < :endTime
     and b.endTime > :startTime
     order by b.startTime
+    
 """)
-    List<Booking> findByRoomAndTimeRange(@Param("roomId")Long roomId,
-                                         @Param("startTime")Instant startTime,
-                                         @Param("endTime")Instant endTime);
+    List<Booking> findBookingByRoomAndTimeRange(@Param("roomId")Long roomId,
+                                                @Param("startTime")Instant startTime,
+                                                @Param("endTime")Instant endTime);
 
     @Query("""
     select b
     from Booking b
     where b.room.id = :roomId
-    and b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
-                    org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
+    and b.status in (org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
+                     org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
     and b.endTime > :now
     order by b.startTime
 """)
-    List<Booking> findActiveByRoom(@Param("roomId")Long roomId,
-                                   @Param("now")Instant now);
+    List<Booking> findActiveBookingByRoom(@Param("roomId")Long roomId,
+                                          @Param("now")Instant now);
 
     List<Booking> findBookingsByOrganizerEmail(String email);
 
     List<Booking> findBookingsByStatus(BookingStatus status);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("""
     update Booking b
     set b.status = org.nurfet.bookingsystem.entity.BookingStatus.EXPIRED,
         b.updatedAt = :now
-    where b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
-                      org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
+    where b.status in (org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
+                       org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
     and b.endTime < :now
 """)
     int markExpiredBookings(@Param("now")Instant now);
@@ -101,8 +107,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     select count(b)
     from Booking b
     where b.room.id = :roomId
-    and b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
-                    org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
+    and b.status in (org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
+                     org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
     and b.endTime > :now
 """)
     long countActiveBookingsByRoom(@Param("roomId")Long roomId,

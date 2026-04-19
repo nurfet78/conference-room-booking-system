@@ -67,7 +67,12 @@ public class RoomService {
             }
         }
 
+<<<<<<< HEAD
         log.info("Room with id: {} updated", room.getId());
+=======
+        log.info("Room with id {} updated", id);
+
+>>>>>>> ec97005a88fa2d730bbad206fc8e9ec92c3beca5
         return roomMapper.toResponse(room);
     }
 

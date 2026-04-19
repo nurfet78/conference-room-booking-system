@@ -3,9 +3,15 @@ package org.nurfet.bookingsystem.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+<<<<<<< HEAD
+=======
+import lombok.Setter;
+import org.springframework.data.convert.Jsr310Converters;
+>>>>>>> ec97005a88fa2d730bbad206fc8e9ec92c3beca5
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Objects;
 
 @Entity
@@ -69,19 +75,33 @@ public class Booking extends BaseEntity {
         this.endTime = endTime;
     }
 
-    public Booking(Room room, String title, String organizerEmail,
-                   Instant startTime, Instant endTime) {
-        this.room = Objects.requireNonNull(room, "Room cannot be null");
-        this.title = Objects.requireNonNull(title, "Title cannot be null");
-        this.organizerEmail = Objects.requireNonNull(organizerEmail,"Organizer email cannot be null");
-        setTimeInterval(startTime, endTime);
-        this.status = BookingStatus.PENDING;
-    }
-
+<<<<<<< HEAD
+=======
     public Duration getDuration() {
         return Duration.between(startTime, endTime);
     }
 
+>>>>>>> ec97005a88fa2d730bbad206fc8e9ec92c3beca5
+    public Booking(Room room, String title, String organizerEmail,
+                   Instant startTime, Instant endTime) {
+        this.room = Objects.requireNonNull(room, "Room cannot be null");
+        this.title = Objects.requireNonNull(title, "Title cannot be null");
+<<<<<<< HEAD
+        this.organizerEmail = Objects.requireNonNull(organizerEmail,"Organizer email cannot be null");
+=======
+        this.organizerEmail = Objects.requireNonNull(organizerEmail, "Organizer email cannot be null");
+>>>>>>> ec97005a88fa2d730bbad206fc8e9ec92c3beca5
+        setTimeInterval(startTime, endTime);
+        this.status = BookingStatus.PENDING;
+    }
+
+<<<<<<< HEAD
+    public Duration getDuration() {
+        return Duration.between(startTime, endTime);
+    }
+
+=======
+>>>>>>> ec97005a88fa2d730bbad206fc8e9ec92c3beca5
     public boolean isActive() {
         return status.isActive();
     }
@@ -96,7 +116,11 @@ public class Booking extends BaseEntity {
 
     public void confirm() {
         if (!status.isConfirmable()) {
+<<<<<<< HEAD
             throw new IllegalStateException("Cannot booking confirm with status " + status);
+=======
+            throw new IllegalStateException("Cannot confirm booking with status " + status);
+>>>>>>> ec97005a88fa2d730bbad206fc8e9ec92c3beca5
         }
 
         if (isExpired()) {
@@ -116,8 +140,12 @@ public class Booking extends BaseEntity {
 
     @Override
     public String toString() {
+<<<<<<< HEAD
         return "Booking{" +
                 "id=" + getId() +
+=======
+        return "Booking{" + "id=" + getId() +
+>>>>>>> ec97005a88fa2d730bbad206fc8e9ec92c3beca5
                 ", room=" + room +
                 ", title='" + title + '\'' +
                 ", organizerEmail='" + organizerEmail + '\'' +
