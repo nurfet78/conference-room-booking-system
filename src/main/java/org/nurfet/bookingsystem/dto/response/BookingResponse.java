@@ -5,56 +5,109 @@ import org.nurfet.bookingsystem.entity.BookingStatus;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.stream.LongStream;
 
-@Schema(description = "Информация о бронировании переговорной комнаты")
+@Schema(
+        description = "Информация о бронировании переговорной комнаты"
+)
 public record BookingResponse(
 
-        @Schema(description = "Уникальный ID бронирования", example = "42", accessMode = Schema.AccessMode.READ_ONLY)
+        @Schema(
+                description = "Уникальный ID бронирования",
+                example = "42",
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
         Long id,
 
-        @Schema(description = "ID забронированной комнаты", example = "1")
+        @Schema(
+                description = "ID забронированной комнаты",
+                example = "1",
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
         Long roomId,
 
-        @Schema(description = "Название комнаты", example = "Конференц-зал «Эверест»")
+        @Schema(
+                description = "Название переговорной комнаты",
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
         String roomName,
 
-        @Schema(description = "Название встречи", example = "Еженедельный стендап команды Backend")
+        @Schema(
+                description = "Название бронирования",
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
         String title,
 
-        @Schema(description = "Email организатора", example = "ivan.petrov@example.com")
+        @Schema(
+                description = "Email организатора бронирования",
+                format = "email",
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
         String organizerEmail,
 
-        @Schema(description = "Время начала", example = "2025-07-01T09:00:00Z")
+        @Schema(
+                description = "Время начала (ISO 8601 UTC)",
+                example = "2026-04-19T09:00:00Z",
+                type = "string",
+                format = "date-time",
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
         Instant startTime,
 
-        @Schema(description = "Время окончания", example = "2025-07-01T10:00:00Z")
+        @Schema(
+                description = "Время окончания (ISO 8601 UTC)",
+                example = "2026-04-19T09:00:00Z",
+                type = "string",
+                format = "date-time",
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
         Instant endTime,
 
-        @Schema(description = "Продолжительность в минутах (вычисляется автоматически)", example = "60", accessMode = Schema.AccessMode.READ_ONLY)
+        @Schema(
+                description = "Продолжительность в минутах",
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
         long durationMinutes,
 
-        @Schema(description = "Текущий статус бронирования", example = "CONFIRMED")
+        @Schema(
+                description = "Текущий статус бронирования",
+                example = "CONFIRMED",
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
         BookingStatus status,
 
-        @Schema(description = "Дата создания", example = "2025-06-20T14:00:00Z", accessMode = Schema.AccessMode.READ_ONLY)
+        @Schema(
+                description = "Дата создания бронирования (ISO 8601 UTC)",
+                example = "2026-04-19T09:00:00Z",
+                type = "string",
+                format = "date-time",
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
         Instant createdAt,
 
-        @Schema(description = "Дата последнего обновления", example = "2025-06-20T14:05:00Z", accessMode = Schema.AccessMode.READ_ONLY)
-        Instant updatedAt) {
+        @Schema(
+                description = "Дата последнего обновления (ISO 8601 UTC)",
+                example = "2026-04-19T09:00:00Z",
+                type = "string",
+                format = "date-time",
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
+        Instant updatedAt
+) {
 
-    public static BookingResponse of(
-            Long id,
-            Long roomId,
-            String roomName,
-            String title,
-            String organizerEmail,
-            Instant startTime,
-            Instant endTime,
-            BookingStatus status,
-            Instant createdAt,
-            Instant updatedAt
-    ) {
+    public static BookingResponse of (Long id,
+                                      Long roomId,
+                                      String roomName,
+                                      String title,
+                                      String organizerEmail,
+                                      Instant startTime,
+                                      Instant endTime,
+                                      BookingStatus status,
+                                      Instant createdAt,
+                                      Instant updatedAt) {
+
         long durationMinutes = Duration.between(startTime, endTime).toMinutes();
+
         return new BookingResponse(
                 id,
                 roomId,

@@ -3,52 +3,51 @@ package org.nurfet.bookingsystem.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Size;
+import lombok.EqualsAndHashCode;
+import org.nurfet.bookingsystem.validation.TimeRangeValidatable;
+import org.nurfet.bookingsystem.validation.annotation.EndAfterStart;
 
+import javax.crypto.Mac;
 import java.time.Instant;
 
-@Schema(description = "Запрос на частичное обновление бронирования (PATCH). Передайте только изменяемые поля")
+@Schema(
+        description = "Запрос на частичное обновление бронирования PATCH (заполните только необходимые поля)"
+)
+@EndAfterStart
 public record UpdateBookingRequest(
 
         @Schema(
-                description = "Новый ID комнаты (для переноса в другую комнату)",
-                example = "2",
+                description = "Смена ID комнаты",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED
         )
         Long roomId,
 
         @Schema(
-                description = "Новое название встречи",
-                example = "Ретроспектива спринта #42",
+                description = "Новое название переговорной комнаты",
                 maxLength = 200,
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED
         )
-        @Size(max = 200, message = "Title must not exceed 200 characters")
+        @Size(max = 200, message = "Название не должно превышать 200 символов")
         String title,
 
         @Schema(
-                description = "Новое время начала (ISO 8601, UTC)",
-                example = "2025-07-01T14:00:00Z",
+                description = "Новое время начала (ISO 8601 UTC)",
+                example = "2026-04-19T09:00:00Z",
                 type = "string",
                 format = "date-time",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED
         )
-        @Future(message = "Start time must be in the future")
+        @Future(message = "Начальное время должно быть в будущем")
         Instant startTime,
 
         @Schema(
-                description = "Новое время окончания (ISO 8601, UTC)",
-                example = "2025-07-01T15:00:00Z",
+                description = "Новое время окончания (ISO 8601 UTC)",
+                example = "2026-04-19T09:00:00Z",
                 type = "string",
                 format = "date-time",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED
         )
-        @Future(message = "End time must be in the future")
+        @Future(message = "Время окончания должно быть в будущем")
         Instant endTime
-) {
-    public UpdateBookingRequest {
-        // Валидация только если оба времени переданы
-        if (startTime != null && endTime != null && !endTime.isAfter(startTime)) {
-            throw new IllegalArgumentException("End time must be after start time");
-        }
-    }
+) implements TimeRangeValidatable {
 }

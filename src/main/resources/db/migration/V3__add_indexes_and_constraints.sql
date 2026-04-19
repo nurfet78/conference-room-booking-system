@@ -22,3 +22,5 @@ ALTER TABLE bookings ADD CONSTRAINT excl_booking_overlap
 
 COMMENT ON CONSTRAINT excl_booking_overlap ON bookings IS 
     'Prevents overlapping bookings for the same room using PostgreSQL exclusion constraint';
+
+

@@ -19,7 +19,7 @@ public record AvailabilityResponse(
 
     /** Слот свободен */
     public static AvailabilityResponse free() {
-        return new AvailabilityResponse(true, null);
+        return new AvailabilityResponse(true, List.of());
     }
 
     /** Слот занят */

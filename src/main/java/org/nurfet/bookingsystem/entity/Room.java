@@ -2,80 +2,71 @@ package org.nurfet.bookingsystem.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
 @Entity
 @Table(name = "rooms")
+@NoArgsConstructor
 @Getter
 public class Room extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "name", nullable = false, unique = true, length = 100)
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     @Column(name = "capacity", nullable = false)
     private Integer capacity;
 
-    @Setter
     @Column(name = "description")
     private String description;
 
     @Column(name = "is_active", nullable = false)
-    private boolean active = true;
-
-    protected Room() {
-
-    }
-
-    public Room(String name, Integer capacity) {
-        this.name = Objects.requireNonNull(name, "Room name cannot be null");
-        setCapacity(capacity);
-    }
+    private Boolean active = true;
 
     public void setName(String name) {
-        this.name = Objects.requireNonNull(name, "Room name cannot be null");
+        this.name = Objects.requireNonNull(name, "Name cannot be null");
     }
 
     public void setCapacity(Integer capacity) {
-        if (capacity == null || capacity <= 0) {
-            throw new IllegalArgumentException("Capacity must by positive");
+        Objects.requireNonNull(capacity, "Capacity cannot be null");
+
+        if (capacity <= 0) {
+            throw new IllegalArgumentException("Capacity must be positive");
         }
+
         this.capacity = capacity;
     }
 
-    public void deactivate() {
-        this.active = false;
+    public void setDescription(String description) {
+        this.description = Objects.requireNonNull(description, "Description cannot be null");
+    }
+
+    public Room(String name, Integer capacity) {
+        this.name = Objects.requireNonNull(name, "Name cannot be null");
+        setCapacity(capacity);
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     public void activate() {
         this.active = true;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Room room)) return false;
-        return id != null && id.equals(room.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
+    public void deactivate() {
+        this.active = false;
     }
 
     @Override
     public String toString() {
         return "Room{" +
-                "id=" + id +
+                "id=" + getId() +
                 ", name='" + name + '\'' +
                 ", capacity=" + capacity +
                 ", description='" + description + '\'' +
                 ", active=" + active +
-                '}';
+                "} " + super.toString();
     }
 }

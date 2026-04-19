@@ -17,6 +17,10 @@ import java.util.Optional;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select b from Booking b where b.id = :id")
+    Optional<Booking> findByIdWithLock(@Param("id")Long id);
+
     @Query("""
     select exists (
         select 1
@@ -34,9 +38,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                      @Param("endTime")Instant endTime,
                                      @Param("excludeId")Long excludeId);
 
-    default boolean existsOverlappingBooking(@Param("roomId")Long roomId,
-                                             @Param("startTime")Instant startTime,
-                                             @Param("endTime")Instant endTime) {
+    default boolean existsOverlappingBooking(Long roomId,
+                                             Instant startTime,
+                                             Instant endTime) {
         return existsOverlappingBooking(roomId, startTime, endTime, null);
     }
 
@@ -45,7 +49,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     from Booking b
     where b.room.id = :roomId
     and b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
-                        org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
+                    org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
     and b.startTime < :endTime
     and b.endTime > :startTime
     order by b.startTime
@@ -53,10 +57,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findOverlappingBooking(@Param("roomId")Long roomId,
                                          @Param("startTime")Instant startTime,
                                          @Param("endTime")Instant endTime);
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select b from Booking b where b.id = :id")
-    Optional<Booking> findByIdWithLock(@Param("id")Long id);
 
     @Query("""
     select b
@@ -82,21 +82,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findActiveByRoom(@Param("roomId")Long roomId,
                                    @Param("now")Instant now);
 
-    @Query("""
-    select b
-    from Booking b
-    where b.organizerEmail = :email
-    order by b.startTime desc
-""")
-    List<Booking> findByOrganizerEmail(@Param("email")String email);
+    List<Booking> findBookingsByOrganizerEmail(String email);
 
-    @Query("""
-    select b
-    from Booking b
-    where b.status = :status
-    order by b.startTime
-""")
-    List<Booking> findByStatus(@Param("status")BookingStatus status);
+    List<Booking> findBookingsByStatus(BookingStatus status);
 
     @Modifying
     @Query("""
@@ -117,6 +105,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                     org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
     and b.endTime > :now
 """)
-    long countActiveBookings(@Param("roomId")Long roomId,
-                             @Param("now")Instant now);
+    long countActiveBookingsByRoom(@Param("roomId")Long roomId,
+                                   @Param("now")Instant now);
 }

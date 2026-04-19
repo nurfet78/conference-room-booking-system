@@ -1,35 +1,23 @@
 package org.nurfet.bookingsystem.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.callbacks.Callbacks;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.nurfet.bookingsystem.dto.request.CreateRoomRequest;
 import org.nurfet.bookingsystem.dto.request.UpdateRoomRequest;
 import org.nurfet.bookingsystem.dto.response.RoomResponse;
 import org.nurfet.bookingsystem.dto.spec.RoomFilter;
 import org.nurfet.bookingsystem.service.RoomService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.image.DirectColorModel;
 
 @RestController
 @RequestMapping("/api/v1/rooms")
@@ -39,41 +27,50 @@ public class RoomController {
 
     private final RoomService roomService;
 
+    @Operation(summary = "Создание комнаты")
+    @ApiResponse(responseCode = "201", description = "Комната создана")
+    @ApiResponse(responseCode = "400", description = "Ошибка валидации")
     @PostMapping
-    public ResponseEntity<RoomResponse> createRoom(@Valid @RequestBody CreateRoomRequest request) {
-        RoomResponse response = roomService.createRoom(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @ResponseStatus(HttpStatus.CREATED)
+    public RoomResponse createRoom(@Valid @RequestBody CreateRoomRequest request) {
+        return roomService.createRoom(request);
     }
 
+    @Operation(summary = "Обновление комнаты (частично)")
+    @ApiResponse(responseCode = "400", description = "Ошибка валидации")
+    @ApiResponse(responseCode = "404", description = "Комната не найдена")
     @PatchMapping("/{id}")
-    public ResponseEntity<RoomResponse> updateRoom(@PathVariable Long id,
-                                                   @Valid @RequestBody UpdateRoomRequest request) {
-
-        RoomResponse response = roomService.updateRoom(id, request);
-        return ResponseEntity.ok(response);
+    public RoomResponse updateRoom(@PathVariable Long id,
+                                   @Valid @RequestBody UpdateRoomRequest request) {
+        return roomService.updateRoom(id, request);
     }
 
+    @Operation(summary = "Получить комнату по ID")
+    @ApiResponse(responseCode = "404", description = "Комната не найдена")
     @GetMapping("/{id}")
-    public ResponseEntity<RoomResponse> getRoom(@PathVariable Long id) {
-        RoomResponse response = roomService.getRoom(id);
-        return ResponseEntity.ok(response);
+    public RoomResponse getRoom(@PathVariable Long id) {
+        return roomService.getRoom(id);
     }
 
+    @Operation(summary = "Получить список комнат")
     @GetMapping
     public Page<RoomResponse> getRooms(
-            @PageableDefault(size = 3, sort = "name", direction = Sort.Direction.ASC)Pageable pageable) {
+            @PageableDefault(size = 3, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
 
         return roomService.getRooms(pageable);
     }
 
+    @Operation(summary = "Поиск комнат с фильтрацией")
     @GetMapping("/search")
-    public Page<RoomResponse> searchRooms(
+    public Page<RoomResponse> searchRoom(
             @Valid @ModelAttribute RoomFilter filter,
             @PageableDefault(size = 3, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
 
-        return roomService.searchRooms(filter, pageable);
+        return roomService.searchRoom(filter, pageable);
     }
 
+    @Operation(summary = "Деактивировать комнату")
+    @ApiResponse(responseCode = "404", description = "Комната не найдена")
     @PostMapping("/{id}/deactivate")
     public RoomResponse deactivate(@PathVariable Long id) {
         return roomService.deactivateRoom(id);

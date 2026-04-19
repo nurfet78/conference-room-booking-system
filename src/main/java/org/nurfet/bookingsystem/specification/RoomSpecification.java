@@ -1,5 +1,4 @@
 package org.nurfet.bookingsystem.specification;
-
 import org.nurfet.bookingsystem.dto.spec.RoomFilter;
 import org.nurfet.bookingsystem.entity.Room;
 import org.springframework.data.jpa.domain.Specification;
