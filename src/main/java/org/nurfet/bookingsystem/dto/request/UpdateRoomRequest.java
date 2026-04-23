@@ -7,12 +7,12 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
 @Schema(
-        description = "Запрос на частичное обновление переговорной комнаты (PATCH) (Заполните только необходимые поля)"
+        description = "Запрос на частичное обновление (PATCH) переговорной комнаты"
 )
 public record UpdateRoomRequest(
 
         @Schema(
-                description = "Новое название переговорной",
+                description = "Новое название переговорной комнаты",
                 maxLength = 100,
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED
         )
@@ -20,17 +20,17 @@ public record UpdateRoomRequest(
         String name,
 
         @Schema(
-                description = "Обновление общей вместимости помещения",
+                description = "Новая общая вместимость",
                 minimum = "1",
                 maximum = "1000",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED
         )
-        @Min(value = 1, message = "Минимальная вместимость 1 место")
-        @Max(value = 1000, message = "Максимальная вместимость 1000 мест")
+        @Min(value = 1, message = "Минимальная вместимость 1")
+        @Max(value = 1000, message = "Максимальная вместимость 1000")
         Integer capacity,
 
         @Schema(
-                description = "Новое описание переговорной комнаты",
+                description = "Новое описание комнаты",
                 maxLength = 1000,
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED
         )
@@ -38,7 +38,7 @@ public record UpdateRoomRequest(
         String description,
 
         @Schema(
-                description = "Активна ли комната (false - недоступна для бронирования)",
+                description = "Активна ли комната (false - не доступна для бронирования)",
                 example = "true",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED
         )

@@ -43,7 +43,7 @@ public class RoomService {
 
     @Transactional
     public RoomResponse updateRoom(Long id, UpdateRoomRequest request) {
-        log.info("Updating room: {}", id);
+        log.info("Updating room with id: {}", id);
 
         Room room = findRoomById(id);
 
@@ -63,16 +63,12 @@ public class RoomService {
             if (request.active()) {
                 room.activate();
             } else {
-                room.deactivate();;
+                room.deactivate();
             }
         }
 
-<<<<<<< HEAD
-        log.info("Room with id: {} updated", room.getId());
-=======
-        log.info("Room with id {} updated", id);
+        log.info("Room with id: {} updated", id);
 
->>>>>>> ec97005a88fa2d730bbad206fc8e9ec92c3beca5
         return roomMapper.toResponse(room);
     }
 
@@ -99,6 +95,7 @@ public class RoomService {
 
         Room room = findRoomById(id);
         room.deactivate();
+
         Room saved = roomRepository.save(room);
         log.info("Room with id: {} deactivated", saved.getId());
 

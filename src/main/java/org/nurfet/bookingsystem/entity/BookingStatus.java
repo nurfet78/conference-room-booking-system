@@ -3,12 +3,12 @@ package org.nurfet.bookingsystem.entity;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(
-        description = "Статус бронирования переговорной",
+        description = "Статус бронирования переговорной комнаты",
         enumAsRef = true
 )
 public enum BookingStatus {
 
-    @Schema(description = "Ждет подтверждения")
+    @Schema(description = "Ожидает подтверждения")
     PENDING,
 
     @Schema(description = "Подтвержден организатором")
@@ -29,7 +29,6 @@ public enum BookingStatus {
     }
 
     public boolean isConfirmable() {
-        return
-                this == PENDING;
+        return this == PENDING;
     }
 }

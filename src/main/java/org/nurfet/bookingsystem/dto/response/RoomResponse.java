@@ -1,6 +1,7 @@
 package org.nurfet.bookingsystem.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
 
 import java.time.Instant;
 
@@ -10,25 +11,25 @@ import java.time.Instant;
 public record RoomResponse(
 
         @Schema(
-                description = "Уникальный ID комнаты",
+                description = "Уникальный ID переговорной комнаты",
                 accessMode = Schema.AccessMode.READ_ONLY
         )
         Long id,
 
         @Schema(
-                description = "Название комнаты",
+                description = "Название переговорной комнаты",
                 accessMode = Schema.AccessMode.READ_ONLY
         )
         String name,
 
         @Schema(
-                description = "Общая вместимость комнаты",
+                description = "Общая вместимость переговорной комнаты",
                 accessMode = Schema.AccessMode.READ_ONLY
         )
         Integer capacity,
 
         @Schema(
-                description = "Описание комнаты",
+                description = "Описание переговорной комнаты",
                 accessMode = Schema.AccessMode.READ_ONLY
         )
         String description,
@@ -41,8 +42,8 @@ public record RoomResponse(
         Boolean active,
 
         @Schema(
-                description = "Дата создание комнаты (ISO 8601 UTC)",
-                example = "2026-04-19T09:00:00Z",
+                description = "Дата создания (ISO 8601 UTC)",
+                example = "2026-01-01T09:00:00Z",
                 type = "string",
                 format = "date-time",
                 accessMode = Schema.AccessMode.READ_ONLY
@@ -50,8 +51,8 @@ public record RoomResponse(
         Instant createdAt,
 
         @Schema(
-                description = "Дата последнего обновления комнаты (ISO 8601 UTC)",
-                example = "2026-04-19T09:00:00Z",
+                description = "Дата последнего обновления (ISO 8601 UTC)",
+                example = "2026-01-01T09:00:00Z",
                 type = "string",
                 format = "date-time",
                 accessMode = Schema.AccessMode.READ_ONLY

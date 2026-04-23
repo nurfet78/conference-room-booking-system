@@ -3,15 +3,9 @@ package org.nurfet.bookingsystem.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-<<<<<<< HEAD
-=======
-import lombok.Setter;
-import org.springframework.data.convert.Jsr310Converters;
->>>>>>> ec97005a88fa2d730bbad206fc8e9ec92c3beca5
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.Objects;
 
 @Entity
@@ -27,7 +21,7 @@ public class Booking extends BaseEntity {
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
-    @Column(name = "title", nullable = false, length = 200)
+    @Column(name = "title", nullable = false)
     private String title;
 
     @Column(name = "organizer_email", nullable = false)
@@ -40,14 +34,15 @@ public class Booking extends BaseEntity {
     private Instant endTime;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
+    @Column(name = "status", nullable = false)
     private BookingStatus status;
 
     public void changeRoom(Room room) {
         this.room = Objects.requireNonNull(room, "Room cannot be null");
     }
 
-    public void setTitle(String title) {
+    public
+    void setTitle(String title) {
         this.title = Objects.requireNonNull(title, "Title cannot be null");
     }
 
@@ -62,7 +57,7 @@ public class Booking extends BaseEntity {
         Duration duration = Duration.between(startTime, endTime);
 
         if (duration.compareTo(MIN_DURATION) < 0) {
-            throw new IllegalArgumentException("Booking duration must be at least " +
+            throw new IllegalArgumentException("Booking duration must be as least " +
                     MIN_DURATION.toMinutes() + " minutes");
         }
 
@@ -75,57 +70,36 @@ public class Booking extends BaseEntity {
         this.endTime = endTime;
     }
 
-<<<<<<< HEAD
-=======
-    public Duration getDuration() {
-        return Duration.between(startTime, endTime);
-    }
-
->>>>>>> ec97005a88fa2d730bbad206fc8e9ec92c3beca5
     public Booking(Room room, String title, String organizerEmail,
                    Instant startTime, Instant endTime) {
         this.room = Objects.requireNonNull(room, "Room cannot be null");
         this.title = Objects.requireNonNull(title, "Title cannot be null");
-<<<<<<< HEAD
-        this.organizerEmail = Objects.requireNonNull(organizerEmail,"Organizer email cannot be null");
-=======
         this.organizerEmail = Objects.requireNonNull(organizerEmail, "Organizer email cannot be null");
->>>>>>> ec97005a88fa2d730bbad206fc8e9ec92c3beca5
         setTimeInterval(startTime, endTime);
         this.status = BookingStatus.PENDING;
     }
 
-<<<<<<< HEAD
-    public Duration getDuration() {
-        return Duration.between(startTime, endTime);
-    }
-
-=======
->>>>>>> ec97005a88fa2d730bbad206fc8e9ec92c3beca5
     public boolean isActive() {
         return status.isActive();
     }
 
-    public boolean isExpired() {
-        return endTime.isBefore(Instant.now());
+    public boolean isExpired(Instant now) {
+        return endTime.isBefore(now);
     }
 
     public boolean overlaps(Instant otherStart, Instant otherEnd) {
         return startTime.isBefore(otherEnd) && endTime.isAfter(otherStart);
     }
 
-    public void confirm() {
+    public void confirm(Instant now) {
         if (!status.isConfirmable()) {
-<<<<<<< HEAD
             throw new IllegalStateException("Cannot booking confirm with status " + status);
-=======
-            throw new IllegalStateException("Cannot confirm booking with status " + status);
->>>>>>> ec97005a88fa2d730bbad206fc8e9ec92c3beca5
         }
 
-        if (isExpired()) {
+        if (isExpired(now)) {
             throw new IllegalStateException("Cannot confirm expired booking");
         }
+
 
         this.status = BookingStatus.CONFIRMED;
     }
@@ -135,23 +109,24 @@ public class Booking extends BaseEntity {
             throw new IllegalStateException("Cannot cancel booking with status " + status);
         }
 
+
         this.status = BookingStatus.CANCELLED;
+    }
+
+    public Duration getDuration() {
+        return Duration.between(startTime, endTime);
     }
 
     @Override
     public String toString() {
-<<<<<<< HEAD
         return "Booking{" +
                 "id=" + getId() +
-=======
-        return "Booking{" + "id=" + getId() +
->>>>>>> ec97005a88fa2d730bbad206fc8e9ec92c3beca5
                 ", room=" + room +
                 ", title='" + title + '\'' +
                 ", organizerEmail='" + organizerEmail + '\'' +
                 ", startTime=" + startTime +
                 ", endTime=" + endTime +
                 ", status=" + status +
-                "} " + super.toString();
+                "}";
     }
 }

@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long>,
-        JpaSpecificationExecutor<Room> {
+                                        JpaSpecificationExecutor<Room> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from Room r where r.id = :id")

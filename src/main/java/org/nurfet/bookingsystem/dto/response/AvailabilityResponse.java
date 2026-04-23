@@ -4,25 +4,29 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
-@Schema(description = "Результат проверки доступности временного слота")
+@Schema(
+        description = "Информация о доступности временного слота"
+)
 public record AvailabilityResponse(
 
-        @Schema(description = "Доступен ли запрошенный временной слот", example = "false")
+        @Schema(
+                description = "Доступен ли запрошенный слот",
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
         boolean available,
 
         @Schema(
-                description = "Список конфликтующих бронирований (только если available = false)",
-                nullable = true
+                description = "Список конфликтующих бронирования (только если available = false)",
+                nullable = true,
+                accessMode = Schema.AccessMode.READ_ONLY
         )
         List<BookingResponse> conflicts
 ) {
 
-    /** Слот свободен */
     public static AvailabilityResponse free() {
         return new AvailabilityResponse(true, List.of());
     }
 
-    /** Слот занят */
     public static AvailabilityResponse unavailable(List<BookingResponse> conflicts) {
         return new AvailabilityResponse(false, conflicts);
     }

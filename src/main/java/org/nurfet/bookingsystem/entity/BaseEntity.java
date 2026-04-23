@@ -17,15 +17,15 @@ public abstract class BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    Instant createdAt;
 
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
+    Instant updatedAt;
 
     @Override
     public boolean equals(Object o) {

@@ -1,6 +1,7 @@
 package org.nurfet.bookingsystem.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
 import org.nurfet.bookingsystem.entity.BookingStatus;
 
 import java.time.Duration;
@@ -8,7 +9,7 @@ import java.time.Instant;
 import java.util.stream.LongStream;
 
 @Schema(
-        description = "Информация о бронировании переговорной комнаты"
+        description = "Информация о бронировании"
 )
 public record BookingResponse(
 
@@ -20,7 +21,7 @@ public record BookingResponse(
         Long id,
 
         @Schema(
-                description = "ID забронированной комнаты",
+                description = "ID переговорной комнаты",
                 example = "1",
                 accessMode = Schema.AccessMode.READ_ONLY
         )
@@ -33,21 +34,21 @@ public record BookingResponse(
         String roomName,
 
         @Schema(
-                description = "Название бронирования",
+                description = "Название встречи",
                 accessMode = Schema.AccessMode.READ_ONLY
         )
         String title,
 
         @Schema(
-                description = "Email организатора бронирования",
+                description = "Email организатора встречи",
                 format = "email",
                 accessMode = Schema.AccessMode.READ_ONLY
         )
         String organizerEmail,
 
         @Schema(
-                description = "Время начала (ISO 8601 UTC)",
-                example = "2026-04-19T09:00:00Z",
+                description = "Дата начала (ISO 8601 UTC)",
+                example = "2026-01-01T09:00:00Z",
                 type = "string",
                 format = "date-time",
                 accessMode = Schema.AccessMode.READ_ONLY
@@ -55,8 +56,8 @@ public record BookingResponse(
         Instant startTime,
 
         @Schema(
-                description = "Время окончания (ISO 8601 UTC)",
-                example = "2026-04-19T09:00:00Z",
+                description = "Дата окончания (ISO 8601 UTC)",
+                example = "2026-01-01T09:00:00Z",
                 type = "string",
                 format = "date-time",
                 accessMode = Schema.AccessMode.READ_ONLY
@@ -78,7 +79,7 @@ public record BookingResponse(
 
         @Schema(
                 description = "Дата создания бронирования (ISO 8601 UTC)",
-                example = "2026-04-19T09:00:00Z",
+                example = "2026-01-01T09:00:00Z",
                 type = "string",
                 format = "date-time",
                 accessMode = Schema.AccessMode.READ_ONLY
@@ -86,8 +87,8 @@ public record BookingResponse(
         Instant createdAt,
 
         @Schema(
-                description = "Дата последнего обновления (ISO 8601 UTC)",
-                example = "2026-04-19T09:00:00Z",
+                description = "Дата последнего обновления бронирования (ISO 8601 UTC)",
+                example = "2026-01-01T09:00:00Z",
                 type = "string",
                 format = "date-time",
                 accessMode = Schema.AccessMode.READ_ONLY
@@ -95,31 +96,22 @@ public record BookingResponse(
         Instant updatedAt
 ) {
 
-    public static BookingResponse of (Long id,
-                                      Long roomId,
-                                      String roomName,
-                                      String title,
-                                      String organizerEmail,
-                                      Instant startTime,
-                                      Instant endTime,
-                                      BookingStatus status,
-                                      Instant createdAt,
-                                      Instant updatedAt) {
+    public static BookingResponse of (
+            Long id,
+            Long roomId,
+            String roomName,
+            String title,
+            String organizerEmail,
+            Instant startTime,
+            Instant endTime,
+            BookingStatus status,
+            Instant createdAt,
+            Instant updatedAt) {
 
         long durationMinutes = Duration.between(startTime, endTime).toMinutes();
 
-        return new BookingResponse(
-                id,
-                roomId,
-                roomName,
-                title,
-                organizerEmail,
-                startTime,
-                endTime,
-                durationMinutes,
-                status,
-                createdAt,
-                updatedAt
-        );
+        return new BookingResponse(id, roomId, roomName, title, organizerEmail,
+                startTime, endTime, durationMinutes,
+                status, createdAt, updatedAt);
     }
 }

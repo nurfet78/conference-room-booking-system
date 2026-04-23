@@ -3,27 +3,25 @@ package org.nurfet.bookingsystem.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Size;
-import lombok.EqualsAndHashCode;
 import org.nurfet.bookingsystem.validation.TimeRangeValidatable;
 import org.nurfet.bookingsystem.validation.annotation.EndAfterStart;
 
-import javax.crypto.Mac;
 import java.time.Instant;
 
 @Schema(
-        description = "Запрос на частичное обновление бронирования PATCH (заполните только необходимые поля)"
+        description = "Запрос на частичное обновление (PATCH) бронирования"
 )
 @EndAfterStart
 public record UpdateBookingRequest(
 
         @Schema(
-                description = "Смена ID комнаты",
+                description = "Новый ID переговорной комнаты (для смены комнаты)",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED
         )
         Long roomId,
 
         @Schema(
-                description = "Новое название переговорной комнаты",
+                description = "Новое название встречи",
                 maxLength = 200,
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED
         )
@@ -31,8 +29,8 @@ public record UpdateBookingRequest(
         String title,
 
         @Schema(
-                description = "Новое время начала (ISO 8601 UTC)",
-                example = "2026-04-19T09:00:00Z",
+                description = "Время начала (ISO 8601 UTC)",
+                example = "2026-01-01T09:00:00Z",
                 type = "string",
                 format = "date-time",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED
@@ -41,8 +39,8 @@ public record UpdateBookingRequest(
         Instant startTime,
 
         @Schema(
-                description = "Новое время окончания (ISO 8601 UTC)",
-                example = "2026-04-19T09:00:00Z",
+                description = "Время окончания (ISO 8601 UTC)",
+                example = "2026-01-01T09:00:00Z",
                 type = "string",
                 format = "date-time",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED

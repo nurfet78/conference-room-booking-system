@@ -195,7 +195,7 @@ public class BookingTest {
             Booking booking = createValidBooking();
             assertThat(booking.getStatus()).isEqualTo(BookingStatus.PENDING);
 
-            booking.confirm();
+            booking.confirm(Instant.now());
             assertThat(booking.getStatus()).isEqualTo(BookingStatus.CONFIRMED);
         }
 
@@ -213,7 +213,7 @@ public class BookingTest {
         @DisplayName("CONFIRMED -> CANCELLED")
         void cancelConfirmedBooking() {
             Booking booking = createValidBooking();
-            booking.confirm();
+            booking.confirm(Instant.now());
 
             booking.cancel();
 
@@ -223,10 +223,11 @@ public class BookingTest {
         @Test
         @DisplayName("No confirm already confirmed")
         void NotConfirmAlreadyConfirmed() {
+            Instant now = Instant.now();
             Booking booking = createValidBooking();
-            booking.confirm();
+            booking.confirm(now);
 
-            assertThatThrownBy(booking::confirm)
+            assertThatThrownBy(() -> booking.confirm(now))
                     .isInstanceOf(IllegalStateException.class);
         }
     }
@@ -246,7 +247,7 @@ public class BookingTest {
         @DisplayName("CONFIRMED считается активным")
         void confirmIsActive() {
             Booking booking = createValidBooking();
-            booking.confirm();
+            booking.confirm(Instant.now());
             assertThat(booking.isActive()).isTrue();
         }
 
