@@ -11,51 +11,44 @@ import java.time.Instant;
 public record RoomResponse(
 
         @Schema(
-                description = "Уникальный ID переговорной комнаты",
-                accessMode = Schema.AccessMode.READ_ONLY
+                description = "Уникальный ID комнаты"
         )
         Long id,
 
         @Schema(
-                description = "Название переговорной комнаты",
-                accessMode = Schema.AccessMode.READ_ONLY
+                description = "Название комнаты"
         )
         String name,
 
         @Schema(
-                description = "Общая вместимость переговорной комнаты",
-                accessMode = Schema.AccessMode.READ_ONLY
+                description = "Вместимость комнаты (число мест)"
         )
         Integer capacity,
 
         @Schema(
-                description = "Описание переговорной комнаты",
-                accessMode = Schema.AccessMode.READ_ONLY
+                description = "Описание комнаты"
         )
         String description,
 
         @Schema(
-                description = "Активна ли комната для бронирования",
-                example = "true",
-                accessMode = Schema.AccessMode.READ_ONLY
+                description = "Активна ли комната (false - комната не доступна)",
+                example = "true"
         )
-        Boolean active,
+        boolean active,
 
         @Schema(
-                description = "Дата создания (ISO 8601 UTC)",
+                description = "Дата создания комнаты (ISO 8601 UTC)",
                 example = "2026-01-01T09:00:00Z",
                 type = "string",
-                format = "date-time",
-                accessMode = Schema.AccessMode.READ_ONLY
+                format = "date-time"
         )
         Instant createdAt,
 
         @Schema(
-                description = "Дата последнего обновления (ISO 8601 UTC)",
+                description = "Дата последнего обновления комнаты (ISO 8601 UTC)",
                 example = "2026-01-01T09:00:00Z",
                 type = "string",
-                format = "date-time",
-                accessMode = Schema.AccessMode.READ_ONLY
+                format = "date-time"
         )
         Instant updatedAt
 ) {

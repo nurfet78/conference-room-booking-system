@@ -25,7 +25,7 @@ public class Room extends BaseEntity {
     private Boolean active = true;
 
     public void setName(String name) {
-        this.name = Objects.requireNonNull(name, "Name cannot be null");
+        this.name = Objects.requireNonNull(name, "Room name cannot be null");
     }
 
     public void setCapacity(Integer capacity) {
@@ -42,13 +42,13 @@ public class Room extends BaseEntity {
         this.description = Objects.requireNonNull(description, "Description cannot be null");
     }
 
-    public Room(String name, Integer capacity) {
-        this.name = Objects.requireNonNull(name, "Name cannot be null");
-        setCapacity(capacity);
-    }
-
     public boolean isActive() {
         return active;
+    }
+
+    public Room(String name, Integer capacity) {
+        this.name = Objects.requireNonNull(name, "Room name cannot be null");
+        setCapacity(capacity);
     }
 
     public void activate() {
@@ -67,7 +67,6 @@ public class Room extends BaseEntity {
                 ", capacity=" + capacity +
                 ", description='" + description + '\'' +
                 ", active=" + active +
-                ", id=" + id +
-                "}";
+                '}';
     }
 }

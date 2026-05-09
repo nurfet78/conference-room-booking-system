@@ -22,20 +22,20 @@ public record CreateBookingRequest(
 
         @Schema(
                 description = "Название встречи",
-                maxLength = 200,
+                maxLength = 100,
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
-        @NotBlank(message = "Необходимо указать название бронирования")
-        @Size(max = 200, message = "Название не должно превышать 200 символов")
+        @NotBlank(message = "Укажите название встречи")
+        @Size(max = 100, message = "Название не должно превышать 100 символов")
         String title,
 
         @Schema(
-                description = "Email организатора бронирования",
+                description = "Email организатора встречи",
                 maxLength = 254,
                 format = "email",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
-        @NotBlank(message = "Необходимо указать email организатора")
+        @NotBlank(message = "Укажите email организатора встречи")
         @Pattern(
                 regexp = "^(?=.{1,254}$)(?=.{1,64}@)"
                         + "[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+"
@@ -47,25 +47,25 @@ public record CreateBookingRequest(
         String organizerEmail,
 
         @Schema(
-                description = "Время начала (ISO 8601 UTC)",
+                description = "Начало встречи (ISO 8601 UTC)",
                 example = "2026-01-01T09:00:00Z",
                 type = "string",
                 format = "date-time",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
-        @NotNull(message = "Необходимо указать начальное время")
-        @Future(message = "Начальное время должно быть в будущем")
+        @NotNull(message = "Укажите дату и время начала встречи")
+        @Future(message = "Время должно быть в будущем")
         Instant startTime,
 
         @Schema(
-                description = "Время окончания (ISO 8601 UTC)",
+                description = "Окончание встречи (ISO 8601 UTC)",
                 example = "2026-01-01T09:00:00Z",
                 type = "string",
                 format = "date-time",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
-        @NotNull(message = "Необходимо указать время окончания")
-        @Future(message = "Конечное время должно быть в будущем")
+        @NotNull(message = "Укажите дату и время окончания встречи")
+        @Future(message = "Время должно быть в будущем")
         Instant endTime
-) implements TimeRangeValidatable {
+) implements TimeRangeValidatable{
 }

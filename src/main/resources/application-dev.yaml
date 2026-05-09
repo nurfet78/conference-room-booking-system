@@ -1,27 +1,48 @@
 spring:
   flyway:
-    cleanDisabled: false   # Разрешаем flyway.clean() — ТОЛЬКО для dev!
-    enabled: true
     locations:
       - classpath:db/migration
       - classpath:db/dev
 
   jpa:
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
 
 logging:
   level:
-    com.example.roombook: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.flywaydb: DEBUG
+    org.nurfet.bookingsystem: debug
+    org.springframework.web: debug
+    org.springframework.security: debug
 
-# ======= Настройки OpenAPI / Swagger UI =======
+    org.hibernate.sql: debug
+    org.hibernate.orm.jdbc.bind: trace
+    org.flywaydb: debug
+  file:
+    name: C:/logs/bookingsystem/app.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+      total-size-cap: 1GB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
 springdoc:
   api-docs:
-    path: /v3/api-docs                    # URL для JSON-спецификации (дефолт)
+    path: /v3/api-docs
   swagger-ui:
-    path: /swagger-ui.html                # URL для Swagger UI (дефолт)
-    tags-sorter: alpha                    # Сортировать теги по алфавиту
-    operations-sorter: method             # Сортировать операции по HTTP-методу (GET, POST...)
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
   default-produces-media-type: application/json
   default-consumes-media-type: application/json

@@ -5,21 +5,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 @Schema(
-        description = "Информация о доступности временного слота"
+        description = "Проверка доступности временного слота"
 )
 public record AvailabilityResponse(
 
-        @Schema(
-                description = "Доступен ли запрошенный слот",
-                accessMode = Schema.AccessMode.READ_ONLY
-        )
+        @Schema(description = "Доступен ли временной слот")
         boolean available,
 
-        @Schema(
-                description = "Список конфликтующих бронирования (только если available = false)",
-                nullable = true,
-                accessMode = Schema.AccessMode.READ_ONLY
-        )
+        @Schema(description = "Список конфликтующих бронирований (если available = false")
         List<BookingResponse> conflicts
 ) {
 

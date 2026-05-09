@@ -1,0 +1,14 @@
+# src/test/resources/application.yml
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+logging:
+  level:
+    org.testcontainers: WARN  # ← меньше шума от Testcontainers в тестах
+    org.flywaydb: INFO        # ← в тестах INFO достаточно, в dev - DEBUG из application-dev.yml

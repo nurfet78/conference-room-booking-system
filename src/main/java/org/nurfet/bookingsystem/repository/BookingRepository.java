@@ -26,7 +26,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                          org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
         and b.startTime < :endTime
         and b.endTime > :startTime
-        and (:excludeId is null or b.id <> :excludeId)
+        and  (:excludeId is null or b.id <> :excludeId)
     )
 """)
     boolean existsOverlappingBooking(@Param("roomId")Long roomId,
@@ -79,14 +79,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     and b.endTime > :now
     order by b.startTime
 """)
-    List<Booking> findActiveByRoom(@Param("roomId")Long roomId,
-                                   @Param("now")Instant now);
+    List<Booking> findActiveBookingsByRoom(@Param("roomId")Long roomId,
+                                           @Param("now")Instant now);
 
-    List<Booking> findBookingsByOrganizerEmail(String email);
+    List<Booking> findByOrganizerEmail(String email);
 
-    List<Booking> findBookingsByStatus(BookingStatus status);
+    List<Booking> findByStatus(BookingStatus status);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
     update Booking b
     set b.status = org.nurfet.bookingsystem.entity.BookingStatus.EXPIRED,
@@ -105,6 +105,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                      org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
     and b.endTime > :now
 """)
-    long countActiveByRoom(@Param("roomId")Long roomId,
-                           @Param("now")Instant now);
+    long countActiveBookingsByRoom(@Param("roomId")Long roomId,
+                                   @Param("now")Instant now);
 }

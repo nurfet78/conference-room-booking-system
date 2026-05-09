@@ -7,8 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
         enumAsRef = true
 )
 public enum BookingStatus {
-
-    @Schema(description = "Ожидает подтверждения")
+    @Schema(description = "Ожидает подтверждение")
     PENDING,
 
     @Schema(description = "Подтвержден организатором")

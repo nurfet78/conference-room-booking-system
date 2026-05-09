@@ -124,6 +124,19 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-actuator-autoconfigure</artifactId>
+        <version>4.1.0-M4</version>
+        <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-configuration-processor</artifactId>
+        <version>4.1.0-M4</version>
+        <scope>compile</scope>
+    </dependency>
 
     <build>
         <plugins>

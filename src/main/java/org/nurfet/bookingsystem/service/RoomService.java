@@ -3,7 +3,6 @@ package org.nurfet.bookingsystem.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.nurfet.bookingsystem.dto.spec.RoomFilter;
-import org.nurfet.bookingsystem.exception.InvalidBookingStateException;
 import org.nurfet.bookingsystem.specification.RoomSpecification;
 import org.nurfet.bookingsystem.dto.request.UpdateRoomRequest;
 import org.nurfet.bookingsystem.exception.EntityNotFoundException;
@@ -67,15 +66,15 @@ public class RoomService {
             }
         }
 
-        log.info("Room with id: {} updated", id);
+        Room saved = roomRepository.save(room);
+        log.info("Room with id: {} updated", saved.getId());
 
-        return roomMapper.toResponse(room);
+        return roomMapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
     public RoomResponse getRoom(Long id) {
-        Room room = findRoomById(id);
-        return roomMapper.toResponse(room);
+        return roomMapper.toResponse(findRoomById(id));
     }
 
     @Transactional(readOnly = true)
@@ -90,12 +89,11 @@ public class RoomService {
     }
 
     @Transactional
-    public RoomResponse deactivateRoom(Long id) {
+    public RoomResponse deactivate(Long id) {
         log.info("Deactivating room with id: {}", id);
 
         Room room = findRoomById(id);
         room.deactivate();
-
         Room saved = roomRepository.save(room);
         log.info("Room with id: {} deactivated", saved.getId());
 

@@ -1,15 +1,12 @@
 package org.nurfet.bookingsystem;
 
-import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.nurfet.bookingsystem.dto.request.CreateRoomRequest;
 import org.nurfet.bookingsystem.dto.request.UpdateRoomRequest;
-import org.nurfet.bookingsystem.dto.response.BookingResponse;
 import org.nurfet.bookingsystem.dto.response.RoomResponse;
-import org.nurfet.bookingsystem.entity.BookingStatus;
 import org.nurfet.bookingsystem.entity.Room;
 import org.nurfet.bookingsystem.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;

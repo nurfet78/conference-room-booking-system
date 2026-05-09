@@ -3,6 +3,8 @@ package org.nurfet.bookingsystem.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.metamodel.internal.JpaStaticMetamodelPopulationSetting;
+import org.nurfet.bookingsystem.validation.annotation.EndAfterStart;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -37,12 +39,11 @@ public class Booking extends BaseEntity {
     @Column(name = "status", nullable = false)
     private BookingStatus status;
 
-    public void changeRoom(Room room) {
+    public void setRoom(Room room) {
         this.room = Objects.requireNonNull(room, "Room cannot be null");
     }
 
-    public
-    void setTitle(String title) {
+    public void setTitle(String title) {
         this.title = Objects.requireNonNull(title, "Title cannot be null");
     }
 
@@ -57,7 +58,7 @@ public class Booking extends BaseEntity {
         Duration duration = Duration.between(startTime, endTime);
 
         if (duration.compareTo(MIN_DURATION) < 0) {
-            throw new IllegalArgumentException("Booking duration must be as least " +
+            throw new IllegalArgumentException("Booking duration must be at least " +
                     MIN_DURATION.toMinutes() + " minutes");
         }
 
@@ -68,6 +69,10 @@ public class Booking extends BaseEntity {
 
         this.startTime = startTime;
         this.endTime = endTime;
+    }
+
+    public Duration getDuration() {
+        return Duration.between(startTime, endTime);
     }
 
     public Booking(Room room, String title, String organizerEmail,
@@ -93,13 +98,12 @@ public class Booking extends BaseEntity {
 
     public void confirm(Instant now) {
         if (!status.isConfirmable()) {
-            throw new IllegalStateException("Cannot booking confirm with status " + status);
+            throw new IllegalStateException("Cannot confirm booking with status " + status);
         }
 
         if (isExpired(now)) {
             throw new IllegalStateException("Cannot confirm expired booking");
         }
-
 
         this.status = BookingStatus.CONFIRMED;
     }
@@ -109,12 +113,7 @@ public class Booking extends BaseEntity {
             throw new IllegalStateException("Cannot cancel booking with status " + status);
         }
 
-
         this.status = BookingStatus.CANCELLED;
-    }
-
-    public Duration getDuration() {
-        return Duration.between(startTime, endTime);
     }
 
     @Override
@@ -127,6 +126,6 @@ public class Booking extends BaseEntity {
                 ", startTime=" + startTime +
                 ", endTime=" + endTime +
                 ", status=" + status +
-                "}";
+                '}';
     }
 }

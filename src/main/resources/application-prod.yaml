@@ -1,0 +1,41 @@
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+        highlight_sql: false
+
+logging:
+  level:
+    root: warn
+    org.nurfet.bookingsystem: info
+  file:
+    name: /var/log/bookingsystem/app.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+      total-size-cap: 1GB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      show-details: never
+  server:
+    port: 8081
+
+springdoc:
+  swagger-ui:
+    enabled: false

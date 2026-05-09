@@ -2,24 +2,24 @@ spring:
   flyway:
     enabled: true
     clean-disabled: false
-    locations:
-      - classpath:db/migration    # Только схема, без тестовых данных
-    # НЕ добавляем classpath:db/dev — тесты создают свои данные
 
   jpa:
-    show-sql: true
     properties:
       hibernate:
         format_sql: true
+        highlight_sql: true
 
   datasource:
-    # Testcontainers подставит через @ServiceConnection
     hikari:
-      maximum-pool-size: 5
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
 
 logging:
   level:
-    org.nurfet.bookingsystem: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.flywaydb: INFO           # INFO достаточно для тестов
-    org.testcontainers: WARN     # Меньше шума от Testcontainers
+    org.nurfet.bookingsystem: debug
+    org.hibernate.sql: debug
+    org.flywaydb: debug
+    org.testcontainers: warn

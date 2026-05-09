@@ -39,11 +39,11 @@ public class RoomSpecification {
         };
     }
 
-    public static Specification<Room> fromFilter(RoomFilter filter) {
+    public static Specification<Room> fromFilter(RoomFilter f) {
         return Specification
-                .where(nameLike(filter.name()))
-                .and(capacityAtLeast(filter.capacity()))
-                .and(descriptionLike(filter.description()))
-                .and(isActive(filter.active()));
+                .where(nameLike(f.name()))
+                .and(capacityAtLeast(f.capacity()))
+                .and(descriptionLike(f.description()))
+                .and(isActive(f.active()));
     }
 }
