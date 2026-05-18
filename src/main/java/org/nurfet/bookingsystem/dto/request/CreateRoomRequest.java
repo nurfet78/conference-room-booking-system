@@ -9,16 +9,16 @@ import jakarta.validation.constraints.*;
 public record CreateRoomRequest(
 
         @Schema(
-                description = "Название переговорной",
-                maxLength = 200,
+                description = "Название переговорной комнаты",
+                maxLength = 100,
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
-        @NotBlank(message = "Необходимо указать название комнаты")
-        @Size(max = 200, message = "Название не должно превышать 200 символов")
+        @NotBlank(message = "Укажите название комнаты")
+        @Size(max = 100, message = "Название не должно превышать 100 символов")
         String name,
 
         @Schema(
-                description = "Вместимость комнаты (число мест)",
+                description = "Вместимость помещения (число мест)",
                 minimum = "1",
                 maximum = "1000",
                 requiredMode = Schema.RequiredMode.REQUIRED
@@ -29,7 +29,7 @@ public record CreateRoomRequest(
         Integer capacity,
 
         @Schema(
-                description = "Описание комнаты (расположение, оборудование и т.д.)",
+                description = "Описание переговорной комнаты (расположение, оборудование и т.д.)",
                 maxLength = 2000,
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED
         )

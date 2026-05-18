@@ -17,14 +17,15 @@ public class BookingCleanupScheduler {
 
     @Scheduled(fixedRate = 1, timeUnit = TimeUnit.MINUTES)
     public void cleanupExpiredBookings() {
+
         try {
             int count = service.markExpiredBookings();
 
             if (count > 0) {
-                log.info("Помечено истекших бронирований: {}", count);
+                log.info("Всего помечено истекших бронирований: {}", count);
             }
         } catch (Exception e) {
-            log.error("Ошибка при очистке бронирований: {}", e.getMessage());
+            log.error("Ошибка при очистке истекших бронирований: {}", e.getMessage());
         }
     }
 }

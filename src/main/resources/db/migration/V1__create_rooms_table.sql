@@ -1,15 +1,13 @@
--- Расширение для exclusion constraints
-CREATE EXTENSION IF NOT EXISTS btree_gist;
+create extension if not exists btree_gist;
 
--- Таблица переговорных комнат
-CREATE TABLE rooms (
-    id              BIGSERIAL PRIMARY KEY,
-    name            VARCHAR(100) NOT NULL UNIQUE,
-    capacity        INTEGER NOT NULL CHECK (capacity > 0),
-    description     TEXT,
-    is_active       BOOLEAN NOT NULL DEFAULT true,
-    created_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+create table rooms (
+    id bigserial primary key,
+    name varchar(100) not null unique,
+    capacity integer not null check ( capacity > 0 ),
+    description text,
+    is_active boolean not null default true,
+    created_at timestamp with time zone not null default now(),
+    updated_at timestamp with time zone not null default now()
 );
 
-COMMENT ON TABLE rooms IS 'Conference rooms available for booking';
+comment on table rooms is 'Conference room for booking'

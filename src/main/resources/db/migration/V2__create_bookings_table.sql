@@ -1,31 +1,24 @@
+create table bookings (
+    id bigserial primary key,
+    room_id bigint not null references rooms(id),
+    title varchar(200) not null,
+    organizer_email varchar(254) not null,
+    start_time timestamp with time zone not null,
+    end_time timestamp with time zone not null,
+    status varchar(20) not null default 'PENDING'
+                      check ( status in ('PENDING', 'CONFIRMED', 'CANCELLED', 'EXPIRED') ),
+    created_at timestamp with time zone not null default now(),
+    updated_at timestamp with time zone not null default now(),
 
+    constraint chk_booking_time_order check ( end_time > start_time ),
 
--- Таблица бронирований
-CREATE TABLE bookings (
-    id              BIGSERIAL PRIMARY KEY,
-    room_id         BIGINT NOT NULL REFERENCES rooms(id),
-    title           VARCHAR(200) NOT NULL,
-    organizer_email VARCHAR(255) NOT NULL,
-    start_time      TIMESTAMP WITH TIME ZONE NOT NULL,
-    end_time        TIMESTAMP WITH TIME ZONE NOT NULL,
-    status          VARCHAR(20) NOT NULL DEFAULT 'PENDING'
-                    CHECK (status IN ('PENDING', 'CONFIRMED', 'CANCELLED', 'EXPIRED')),
-    created_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    constraint chk_booking_min_duration check (
+        end_time - start_time >= interval '15 minutes'
+        ),
 
-    -- end_time > start_time
-    CONSTRAINT chk_booking_time_order CHECK (end_time > start_time),
-
-    
-    -- Минимальная длительность 15 минут
-    CONSTRAINT chk_booking_min_duration CHECK (
-        EXTRACT(EPOCH FROM (end_time - start_time)) >= 900
-    ),
-    
-    -- Максимальная длительность 8 часов
-    CONSTRAINT chk_booking_max_duration CHECK (
-        EXTRACT(EPOCH FROM (end_time - start_time)) <= 28800
-    )
+    constraint chk_booking_max_duration check (
+        end_time - start_time <= interval '8 hours'
+        )
 );
 
-COMMENT ON TABLE bookings IS 'Room reservations with time intervals';
+comment on table bookings is 'Room reservations with time intervals'

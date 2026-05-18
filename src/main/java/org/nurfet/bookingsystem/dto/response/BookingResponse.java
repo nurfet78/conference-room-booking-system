@@ -6,9 +6,7 @@ import org.nurfet.bookingsystem.entity.BookingStatus;
 import java.time.Duration;
 import java.time.Instant;
 
-@Schema(
-        description = "Информация о бронировании"
-)
+@Schema(description = "Информация о бронировании")
 public record BookingResponse(
 
         @Schema(
@@ -16,24 +14,16 @@ public record BookingResponse(
         )
         Long id,
 
-        @Schema(
-                description = "ID забронированной комнаты"
-        )
+        @Schema(description = "ID забронированной комнаты")
         Long roomId,
 
-        @Schema(
-                description = "Название комнаты"
-        )
+        @Schema(description = "Название переговорной комнаты")
         String roomName,
 
-        @Schema(
-                description = "Название встречи"
-        )
+        @Schema(description = "Название встречи")
         String title,
 
-        @Schema(
-                description = "Email организатора встречи"
-        )
+        @Schema(description = "Email организатора встречи")
         String organizerEmail,
 
         @Schema(
@@ -52,9 +42,7 @@ public record BookingResponse(
         )
         Instant endTime,
 
-        @Schema(
-                description = "Длительность в минутах"
-        )
+        @Schema(description = "Продолжительность встречи в минутах")
         long durationMinutes,
 
         @Schema(
@@ -64,7 +52,7 @@ public record BookingResponse(
         BookingStatus status,
 
         @Schema(
-                description = "Дата создания бронирования (ISO 8601 UTC)",
+                description = "Время создание бронирования (ISO 8601 UTC)",
                 example = "2026-01-01T09:00:00Z",
                 type = "string",
                 format = "date-time"
@@ -72,7 +60,7 @@ public record BookingResponse(
         Instant createdAt,
 
         @Schema(
-                description = "Дата последнего обновления (ISO 8601 UTC)",
+                description = "Время последнего обновления бронирования (ISO 8601 UTC)",
                 example = "2026-01-01T09:00:00Z",
                 type = "string",
                 format = "date-time"
@@ -80,10 +68,12 @@ public record BookingResponse(
         Instant updatedAt
 ) {
 
-    public static BookingResponse of(Long id, Long roomId, String roomName,
-                                     String title, String organizerEmail,
-                                     Instant startTime, Instant endTime,
-                                     BookingStatus status, Instant createdAt, Instant updatedAt) {
+    public static BookingResponse of(
+            Long id, Long roomId, String roomName,
+            String title, String organizerEmail,
+            Instant startTime, Instant endTime,
+            BookingStatus status,
+            Instant createdAt, Instant updatedAt) {
 
         long durationMinutes = Duration.between(startTime, endTime).toMinutes();
 

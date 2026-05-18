@@ -5,7 +5,7 @@ spring:
     name: BookingSystem
   datasource:
     url: ${DB_URL}
-    username: ${POSTGRES_USER}
+    username: ${POSTGRES_NAME}
     password: ${POSTGRES_PASSWORD}
   flyway:
     enabled: true
@@ -14,8 +14,10 @@ spring:
     validate-on-migrate: true
 
   jpa:
+    show-sql: false
     hibernate:
       ddl-auto: none
+
   mvc:
     hiddenmethod:
       filter:

@@ -6,16 +6,14 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
-@Schema(
-        description = "Частичное обновление переговорной комнаты"
-)
+@Schema(description = "Запрос на частичное обновление переговорной комнаты")
 public record UpdateRoomRequest(
 
         @Schema(
-                description = "Новое название переговорной комнаты",
-                maxLength = 200
+                description = "Новое название комнаты",
+                maxLength = 100
         )
-        @Size(max = 200, message = "Название не должно превышать 200 символов")
+        @Size(max = 100, message = "Название не должно превышать 100 символов")
         String name,
 
         @Schema(
@@ -28,9 +26,8 @@ public record UpdateRoomRequest(
         Integer capacity,
 
         @Schema(
-                description = "Описание комнаты (расположение, оборудование и т.д.)",
-                maxLength = 2000,
-                requiredMode = Schema.RequiredMode.NOT_REQUIRED
+                description = "Новое описание комнаты",
+                maxLength = 2000
         )
         @Size(max = 2000, message = "Описание не должно превышать 2000 символов")
         String description,

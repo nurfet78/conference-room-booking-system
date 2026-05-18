@@ -19,7 +19,7 @@ public class OpenApiConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Booking Room API")
+                        .title("Room Booking API")
                         .version("1.0.0")
                         .description("""
                                 REST API для управления переговорными комнатами и бронированием.
@@ -39,19 +39,19 @@ public class OpenApiConfig {
                         .contact(new Contact()
                                 .name("Booking Team")
                                 .email("booking-team@example.com")
-                                .url("https://team.example.com"))
+                                .url("https://booking-example.com"))
                         .license(new License()
                                 .name("Apache 2")
-                                .url("https://www.apache.org/licenses/LICENSE-2.0")))
+                                .url("https://www.apache.org.LICENSES/license-2.0")))
                 .servers(List.of(
                         new Server()
                                 .url("http://localhost:8888")
                                 .description("Локальная разработка"),
                         new Server()
-                                .url("https://api-staging.exam ple.com")
+                                .url("https://api-staging-example.com")
                                 .description("Staging окружение"),
                         new Server()
-                                .url("https://example.com")
+                                .url("https://product_example.com")
                                 .description("Production")
                 ))
                 .tags(List.of(
@@ -60,7 +60,7 @@ public class OpenApiConfig {
                                 .description("Управление переговорными комнатами: создание, просмотр, обновление, деактивация"),
                         new Tag()
                                 .name("Бронирования")
-                                .description("Управление переговорными комнатами: создание, просмотр, обновление, деактивация")
+                                .description("Управление бронированиями: создание, просмотр, подтверждение, отмена")
                 ));
     }
 }

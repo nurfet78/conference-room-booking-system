@@ -17,13 +17,13 @@ public interface BookingMapper {
     @Mapping(target = "roomId", source = "room.id")
     @Mapping(target = "roomName", source = "room.name")
     @Mapping(target = "durationMinutes", source = ".",
-            qualifiedByName = "durationMinutes")
+             qualifiedByName = "calculateDuration")
     BookingResponse toResponse(Booking booking);
 
     List<BookingResponse> toResponseList(List<Booking> bookings);
 
-    @Named("durationMinutes")
-    default long calculateMinutes(Booking booking) {
+    @Named("calculateDuration")
+    default long calculateDuration(Booking booking) {
         return Duration.between(booking.getStartTime(), booking.getEndTime()).toMinutes();
     }
 }

@@ -24,7 +24,7 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomMapper roomMapper;
 
-    private Room findRoomById(Long id) {
+    public Room findRoomById(Long id) {
         return roomRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Room", id));
     }
@@ -66,10 +66,9 @@ public class RoomService {
             }
         }
 
-        Room saved = roomRepository.save(room);
-        log.info("Room with id: {} updated", saved.getId());
+        log.info("Room with id: {} updated", id);
 
-        return roomMapper.toResponse(saved);
+        return roomMapper.toResponse(room);
     }
 
     @Transactional(readOnly = true)

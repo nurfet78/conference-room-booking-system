@@ -285,7 +285,7 @@ public class RoomControllerIntegrationTest extends AbstractIntegrationTest {
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody()
-                    .jsonPath("$.totalElements").isEqualTo(3);
+                    .jsonPath("$.page.totalElements").isEqualTo(3);
         }
 
         @Test
@@ -299,8 +299,8 @@ public class RoomControllerIntegrationTest extends AbstractIntegrationTest {
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody()
-                    .jsonPath("$.totalElements").isEqualTo(1)
-                    .jsonPath("$.content[0].name").isEqualTo("Small Room");
+                    .jsonPath("$.page.totalElements").isEqualTo(1)
+                    .jsonPath("$._embedded.rooms[0].name").isEqualTo("Small Room");
         }
 
         @Test
@@ -314,8 +314,8 @@ public class RoomControllerIntegrationTest extends AbstractIntegrationTest {
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody()
-                    .jsonPath("$.totalElements").isEqualTo(2)  // Medium (15) + Large (30)
-                    .jsonPath("$.content[?(@.name == 'Small Room')]").doesNotExist();
+                    .jsonPath("$.page.totalElements").isEqualTo(2)
+                    .jsonPath("$._embedded.rooms[?(@.name == 'Small Room')]").doesNotExist();
         }
 
         @Test
@@ -329,8 +329,8 @@ public class RoomControllerIntegrationTest extends AbstractIntegrationTest {
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody()
-                    .jsonPath("$.totalElements").isEqualTo(1)  // только Large (30)
-                    .jsonPath("$.content[0].name").isEqualTo("Large Room");
+                    .jsonPath("$.page.totalElements").isEqualTo(1)
+                    .jsonPath("$._embedded.rooms[0].name").isEqualTo("Large Room");
         }
 
         @Test
@@ -344,8 +344,8 @@ public class RoomControllerIntegrationTest extends AbstractIntegrationTest {
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody()
-                    .jsonPath("$.totalElements").isEqualTo(2)
-                    .jsonPath("$.content[?(@.name == 'Large Room')]").doesNotExist();
+                    .jsonPath("$.page.totalElements").isEqualTo(2)
+                    .jsonPath("$._embedded.rooms[?(@.name == 'Large Room')]").doesNotExist();
         }
 
         @Test
@@ -359,8 +359,8 @@ public class RoomControllerIntegrationTest extends AbstractIntegrationTest {
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody()
-                    .jsonPath("$.totalElements").isEqualTo(2)
-                    .jsonPath("$.content[?(@.name == 'Large Room')]").doesNotExist();
+                    .jsonPath("$.page.totalElements").isEqualTo(2)
+                    .jsonPath("$._embedded.rooms[?(@.name == 'Large Room')]").doesNotExist();
         }
 
         @Test
@@ -374,8 +374,8 @@ public class RoomControllerIntegrationTest extends AbstractIntegrationTest {
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody()
-                    .jsonPath("$.totalElements").isEqualTo(1)
-                    .jsonPath("$.content[0].name").isEqualTo("Large Room");
+                    .jsonPath("$.page.totalElements").isEqualTo(1)
+                    .jsonPath("$._embedded.rooms[0].name").isEqualTo("Large Room");
         }
 
         @Test
@@ -390,8 +390,8 @@ public class RoomControllerIntegrationTest extends AbstractIntegrationTest {
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody()
-                    .jsonPath("$.totalElements").isEqualTo(2)
-                    .jsonPath("$.content[?(@.name == 'Large Room')]").doesNotExist();
+                    .jsonPath("$.page.totalElements").isEqualTo(2)
+                    .jsonPath("$._embedded.rooms[?(@.name == 'Large Room')]").doesNotExist();
         }
 
         @Test
@@ -405,8 +405,8 @@ public class RoomControllerIntegrationTest extends AbstractIntegrationTest {
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody()
-                    .jsonPath("$.totalElements").isEqualTo(0)
-                    .jsonPath("$.content").isEmpty();
+                    .jsonPath("$.page.totalElements").isEqualTo(0)
+                    .jsonPath("$._embedded").doesNotExist(); // HATEOAS не включает _embedded если список пуст
         }
 
         @Test
@@ -417,9 +417,9 @@ public class RoomControllerIntegrationTest extends AbstractIntegrationTest {
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody()
-                    .jsonPath("$.content[0].name").isEqualTo("Large Room")
-                    .jsonPath("$.content[1].name").isEqualTo("Medium Room")
-                    .jsonPath("$.content[2].name").isEqualTo("Small Room");
+                    .jsonPath("$._embedded.rooms[0].name").isEqualTo("Large Room")
+                    .jsonPath("$._embedded.rooms[1].name").isEqualTo("Medium Room")
+                    .jsonPath("$._embedded.rooms[2].name").isEqualTo("Small Room");
         }
 
         @Test
@@ -428,7 +428,7 @@ public class RoomControllerIntegrationTest extends AbstractIntegrationTest {
             webTestClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/api/v1/rooms/search")
-                            .queryParam("capacity", 0)  // @Min(1)
+                            .queryParam("capacity", 0)
                             .build())
                     .exchange()
                     .expectStatus().isBadRequest()

@@ -12,7 +12,7 @@ import java.util.Objects;
 @Getter
 public class Room extends BaseEntity {
 
-    @Column(name = "name", nullable = false, unique = true)
+    @Column(name = "name", unique = true, nullable = false)
     private String name;
 
     @Column(name = "capacity", nullable = false)
@@ -25,14 +25,14 @@ public class Room extends BaseEntity {
     private Boolean active = true;
 
     public void setName(String name) {
-        this.name = Objects.requireNonNull(name, "Room name cannot be null");
+        this.name = Objects.requireNonNull(name, "Name cannot be null");
     }
 
     public void setCapacity(Integer capacity) {
         Objects.requireNonNull(capacity, "Capacity cannot be null");
 
         if (capacity <= 0) {
-            throw new IllegalArgumentException("Capacity mus be positive");
+            throw new IllegalArgumentException("Capacity must be positive");
         }
 
         this.capacity = capacity;
@@ -47,7 +47,7 @@ public class Room extends BaseEntity {
     }
 
     public Room(String name, Integer capacity) {
-        this.name = Objects.requireNonNull(name, "Room name cannot be null");
+        this.name = Objects.requireNonNull(name, "Name cannot be null");
         setCapacity(capacity);
     }
 

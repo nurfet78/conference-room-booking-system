@@ -1,40 +1,44 @@
 package org.nurfet.bookingsystem.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Size;
+import org.springframework.hateoas.server.core.Relation;
 
 import java.time.Instant;
 
 @Schema(
         description = "Информация о переговорной комнате"
 )
+
+/*
+По умолчанию Spring HATEOAS назовёт массив roomResponseList — некрасиво. Исправляется аннотацией на RoomResponse
+
+Теперь в JSON будет _embedded.rooms вместо _embedded.roomResponseList
+
+
+collectionRelation = "rooms" — имя массива в _embedded при пагинации ($._embedded.rooms)
+itemRelation = "room" — имя при возврате одного объекта (используется реже)
+*/
+
+@Relation(collectionRelation = "rooms", itemRelation = "room")
 public record RoomResponse(
 
-        @Schema(
-                description = "Уникальный ID комнаты"
-        )
+        @Schema(description = "Уникальный ID комнаты")
         Long id,
 
-        @Schema(
-                description = "Название комнаты"
-        )
+        @Schema(description = "Название комнаты")
         String name,
 
-        @Schema(
-                description = "Вместимость комнаты (число мест)"
-        )
+        @Schema(description = "Вместимость комнаты (число мест)")
         Integer capacity,
 
-        @Schema(
-                description = "Описание комнаты"
-        )
+        @Schema(description = "Описание комнаты")
         String description,
 
         @Schema(
-                description = "Активна ли комната (false - комната не доступна)",
+                description = "Активна ли комната (false - комната не доступна для бронирования)",
                 example = "true"
         )
-        boolean active,
+        Boolean active,
 
         @Schema(
                 description = "Дата создания комнаты (ISO 8601 UTC)",

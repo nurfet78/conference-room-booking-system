@@ -44,7 +44,7 @@ public class Booking extends BaseEntity {
     }
 
     public void setTitle(String title) {
-        this.title = Objects.requireNonNull(title, "Title cannot be null");
+        this.title = Objects.requireNonNull(title, "Name cannot be null");
     }
 
     public void setTimeInterval(Instant startTime, Instant endTime) {
@@ -58,7 +58,7 @@ public class Booking extends BaseEntity {
         Duration duration = Duration.between(startTime, endTime);
 
         if (duration.compareTo(MIN_DURATION) < 0) {
-            throw new IllegalArgumentException("Booking duration must be at least " +
+            throw new IllegalArgumentException("Booking duration must be as least " +
                     MIN_DURATION.toMinutes() + " minutes");
         }
 
@@ -67,21 +67,22 @@ public class Booking extends BaseEntity {
                     MAX_DURATION.toHours() + " hours");
         }
 
+
         this.startTime = startTime;
         this.endTime = endTime;
-    }
-
-    public Duration getDuration() {
-        return Duration.between(startTime, endTime);
     }
 
     public Booking(Room room, String title, String organizerEmail,
                    Instant startTime, Instant endTime) {
         this.room = Objects.requireNonNull(room, "Room cannot be null");
-        this.title = Objects.requireNonNull(title, "Title cannot be null");
+        this.title = Objects.requireNonNull(title, "Name cannot be null");
         this.organizerEmail = Objects.requireNonNull(organizerEmail, "Organizer email cannot be null");
         setTimeInterval(startTime, endTime);
         this.status = BookingStatus.PENDING;
+    }
+
+    public Duration getDuration() {
+        return Duration.between(startTime, endTime);
     }
 
     public boolean isActive() {

@@ -5,14 +5,14 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
-@Schema(description = "Фильтрация при поиске комнаты")
+@Schema(description = "Поиск комнат с определенными параметрами")
 public record RoomFilter(
 
         @Schema(
                 description = "Название комнаты",
-                maxLength = 200
+                maxLength = 100
         )
-        @Size(max = 200, message = "Название не должно превышать 200 символов")
+        @Size(max = 100, message = "Название не должно превышать 100 символов")
         String name,
 
         @Schema(
@@ -31,14 +31,11 @@ public record RoomFilter(
         @Size(max = 2000, message = "Описание не должно превышать 2000 символов")
         String description,
 
-        @Schema(
-                description = "Активна ли комната",
-                example = "true"
-        )
+        @Schema(description = "Активна ли комната", example = "true")
         Boolean active
 ) {
 
-    public static RoomFilter empty() {
-        return new RoomFilter(null, null, null, null);
-    }
+        public static RoomFilter empty() {
+                return new RoomFilter(null, null, null, null);
+        }
 }

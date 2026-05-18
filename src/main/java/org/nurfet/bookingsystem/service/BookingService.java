@@ -83,7 +83,7 @@ public class BookingService {
         Instant endTime = request.endTime() != null ? request.endTime() : booking.getEndTime();
 
         if (!endTime.isAfter(startTime)) {
-            throw new IllegalArgumentException("End time must be after start time");
+            throw new IllegalStateException("End time must be after start time");
         }
 
         boolean roomChanged = !roomId.equals(booking.getRoom().getId());
@@ -122,10 +122,9 @@ public class BookingService {
             booking.setTimeInterval(startTime, endTime);
         }
 
-        Booking saved = bookingRepository.save(booking);
-        log.info("Booking with id: {} updated", saved.getId());
+        log.info("Booking with id: {} updated", booking.getId());
 
-        return bookingMapper.toResponse(saved);
+        return bookingMapper.toResponse(booking);
     }
 
     @Transactional(readOnly = true)
@@ -133,10 +132,11 @@ public class BookingService {
         return bookingMapper.toResponse(findBookingById(id));
     }
 
+
     @Transactional(readOnly = true)
     public List<BookingResponse> getBookingByRoomAndTimeRange(Long roomId,
-                                                              Instant from,
-                                                              Instant to) {
+                                                                   Instant from,
+                                                                   Instant to) {
         if (!roomRepository.existsById(roomId)) {
             throw new EntityNotFoundException("Room", roomId);
         }
@@ -158,6 +158,12 @@ public class BookingService {
     @Transactional(readOnly = true)
     public List<BookingResponse> getBookingsByOrganizerEmail(String email) {
         List<Booking> bookings = bookingRepository.findByOrganizerEmail(email);
+        return bookingMapper.toResponseList(bookings);
+    }
+
+    @Transactional(readOnly = true)
+    public List<BookingResponse> getBookingsByStatus(BookingStatus status) {
+        List<Booking> bookings = bookingRepository.findByStatus(status);
         return bookingMapper.toResponseList(bookings);
     }
 
@@ -193,12 +199,6 @@ public class BookingService {
         log.info("Booking with id: {} cancelled", saved.getId());
 
         return bookingMapper.toResponse(saved);
-    }
-
-    @Transactional(readOnly = true)
-    public List<BookingResponse> getBookingsByStatus(BookingStatus status) {
-        List<Booking> bookings = bookingRepository.findByStatus(status);
-        return bookingMapper.toResponseList(bookings);
     }
 
     @Transactional(readOnly = true)

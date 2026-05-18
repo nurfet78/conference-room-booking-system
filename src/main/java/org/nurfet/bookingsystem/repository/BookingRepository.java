@@ -22,11 +22,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         select 1
         from Booking b
         where b.room.id = :roomId
-        and b.status in (org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
-                         org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
+        and b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
+                        org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
         and b.startTime < :endTime
         and b.endTime > :startTime
-        and  (:excludeId is null or b.id <> :excludeId)
+        and (:excludeId is null or b.id <> :excludeId)
     )
 """)
     boolean existsOverlappingBooking(@Param("roomId")Long roomId,
@@ -44,8 +44,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     select b
     from Booking b
     where b.room.id = :roomId
-    and b.status in (org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
-                     org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
+    and b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
+                    org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
     and b.startTime < :endTime
     and b.endTime > :startTime
     order by b.startTime
@@ -74,8 +74,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     select b
     from Booking b
     where b.room.id = :roomId
-    and b.status in (org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
-                     org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
+    and b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
+                    org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
     and b.endTime > :now
     order by b.startTime
 """)
@@ -86,13 +86,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByStatus(BookingStatus status);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(clearAutomatically = false, flushAutomatically = true)
     @Query("""
     update Booking b
     set b.status = org.nurfet.bookingsystem.entity.BookingStatus.EXPIRED,
         b.updatedAt = :now
-    where b.status in (org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
-                       org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
+    where b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
+                      org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
     and b.endTime < :now
 """)
     int markExpiredBookings(@Param("now")Instant now);
@@ -101,8 +101,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     select count(b)
     from Booking b
     where b.room.id = :roomId
-    and b.status in (org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
-                     org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
+    and b.status in(org.nurfet.bookingsystem.entity.BookingStatus.PENDING,
+                    org.nurfet.bookingsystem.entity.BookingStatus.CONFIRMED)
     and b.endTime > :now
 """)
     long countActiveBookingsByRoom(@Param("roomId")Long roomId,

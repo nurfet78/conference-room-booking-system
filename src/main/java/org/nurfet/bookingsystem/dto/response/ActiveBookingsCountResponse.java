@@ -2,6 +2,6 @@ package org.nurfet.bookingsystem.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "Активные бронирования комнаты")
+@Schema(description = "Возвращает число активных бронирований комнаты")
 public record ActiveBookingsCountResponse(long activeBookingsCount) {
 }

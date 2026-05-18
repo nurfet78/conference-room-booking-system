@@ -25,8 +25,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
-@RequiredArgsConstructor
 @Tag(name = "Бронирования")
+@RequiredArgsConstructor
 @Validated
 public class BookingController {
 
@@ -34,24 +34,22 @@ public class BookingController {
 
     @Operation(summary = "Создание бронирования")
     @ApiResponse(responseCode = "201", description = "Бронирование создано")
-    @ApiResponse(responseCode = "400", description = "Ошибка валидации")
     @ApiResponse(responseCode = "409", description = "Конфликт времени")
     @ApiResponse(responseCode = "404", description = "Комната не найдена")
+    @ApiResponse(responseCode = "400", description = "Ошибка валидации")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BookingResponse createdBooking(@Valid @RequestBody CreateBookingRequest request) {
+    public BookingResponse createBooking(@Valid @RequestBody CreateBookingRequest request) {
         return service.createBooking(request);
     }
 
     @Operation(summary = "Частичное обновление бронирования")
-    @ApiResponse(responseCode = "201", description = "Бронирование обновлено")
-    @ApiResponse(responseCode = "400", description = "Ошибка валидации")
     @ApiResponse(responseCode = "409", description = "Конфликт времени")
     @ApiResponse(responseCode = "404", description = "Бронирование не найдено")
+    @ApiResponse(responseCode = "400", description = "Ошибка валидации")
     @PatchMapping("/{id}")
     public BookingResponse updateBooking(@PathVariable Long id,
                                          @Valid @RequestBody UpdateBookingRequest request) {
-
         return service.updateBooking(id, request);
     }
 
@@ -62,7 +60,7 @@ public class BookingController {
         return service.getBooking(id);
     }
 
-    @Operation(summary = "Бронирования комнаты за период")
+    @Operation(summary = "Получить бронирования за период")
     @ApiResponse(responseCode = "404", description = "Комната не найдена")
     @GetMapping("/room/{roomId}")
     public List<BookingResponse> getByRoomAndTimeRange(
@@ -76,23 +74,21 @@ public class BookingController {
     @Operation(summary = "Получить активные бронирования комнаты")
     @ApiResponse(responseCode = "404", description = "Комната не найдена")
     @GetMapping("/room/{roomId}/active")
-    public List<BookingResponse> getActiveByRoom(@PathVariable Long roomId) {
+    public List<BookingResponse> getActiveBookingsByRoom(@PathVariable Long roomId) {
         return service.getActiveBookingsByRoom(roomId);
     }
 
-    @Operation(summary = "Получить бронирования по email организатора",
-    description = "Email организатора бронирования")
+    @Operation(summary = "Получить бронирования по email организатора")
     @GetMapping("/organizer")
-    public List<BookingResponse> getByOrganizerEmail(
-            @Parameter(description = "Email организатора")
-            @Email @NotBlank @RequestParam String email) {
+    public List<BookingResponse> getBookingByOrganizerEmail(@RequestParam @NotBlank @Email String email) {
+
         return service.getBookingsByOrganizerEmail(email);
     }
 
     @Operation(summary = "Получить бронирования по статусу")
     @GetMapping("/status")
-    public List<BookingResponse> getByStatus(
-            @Parameter(description = "Статус бронирования", example = "CONFIRMED")
+    public List<BookingResponse> getBookingByStatus(
+            @Parameter(description = "Текущий статус бронирования", example = "CONFIRMED")
             @RequestParam BookingStatus status) {
         return service.getBookingsByStatus(status);
     }
@@ -101,15 +97,15 @@ public class BookingController {
     @ApiResponse(responseCode = "400", description = "Неверный статус для подтверждения")
     @ApiResponse(responseCode = "404", description = "Бронирование не найдено")
     @PostMapping("/{id}/confirm")
-    public BookingResponse confirmBooking(@PathVariable Long id) {
+    public BookingResponse confirm(@PathVariable Long id) {
         return service.confirmBooking(id);
     }
 
     @Operation(summary = "Отменить бронирование")
-    @ApiResponse(responseCode = "400", description = "Бронирование отменить нельзя")
+    @ApiResponse(responseCode = "400", description = "Невозможно отменить бронирование")
     @ApiResponse(responseCode = "404", description = "Бронирование не найдено")
     @PostMapping("/{id}/cancel")
-    public BookingResponse cancelBooking(@PathVariable Long id) {
+    public BookingResponse cancel(@PathVariable Long id) {
         return service.cancelBooking(id);
     }
 
@@ -125,7 +121,7 @@ public class BookingController {
 
     @Operation(summary = "Количество активных бронирований комнаты")
     @GetMapping("/room/{roomId}/count")
-    public ActiveBookingsCountResponse getActiveBookingsCount(@PathVariable Long roomId) {
+    public ActiveBookingsCountResponse countActiveBookingByRoom(@PathVariable Long roomId) {
         long count = service.countActiveBookingsByRoom(roomId);
 
         return new ActiveBookingsCountResponse(count);
